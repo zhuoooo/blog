@@ -31,7 +31,8 @@ Vue.use(VueCompositionApi)
 
 ### 支持`<script setup>`语法
 
-<script setup>是在单文件组件 (SFC) 中使用组合式 API 的编译时语法糖，是 Vue3.2 新加入的语法。那么，我们也可以在 Vue2 项目中使用它。文档：https://v3.cn.vuejs.org/guide/composition-api-setup.html
+`<script setup> `是在单文件组件 (SFC) 中使用组合式 API 的编译时语法糖，是 Vue3.2 新加入的语法。那么，我们也可以在 Vue2 项目中使用它。[文档](https://v3.cn.vuejs.org/guide/composition-api-setup.html)
+
 
 需要安装`unplugin-vue2-script-setup`依赖。
 
