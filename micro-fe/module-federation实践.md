@@ -46,7 +46,24 @@
 
 ## 方案选择
 
+方案：
 
+1. 应用微服务化，诸如 qiankun2
+   - 存在性能问题，且沙箱逃逸问题难解决，放弃
+2. 微件化：通过组合多个独立应用、组件来构建一个单体应用，例如 Module Federation
+   - 在接入第三方应用上存在的问题比较大，但是对于我们想要达到【独立升级】的效果来说，此短板可以接受
+3. 结合 Web Components 构建，例如 micro-app
+   - 在处理沙箱的性能问题和逃逸问题上虽然比方案1更优秀，但这两个问题出现还是难解决，且目前官方维护的频率及未有稳定版本，放弃
+4. MPA+路由分发
+   - 相当将原本的一个系统拆成多个系统，体验上无法接受，放弃
+5. MPA + iframe
+   -  iframe 在性能和用户体验上的问题也是无法接受，放弃
+6. 纯 Web Component 进行构建应用
+   - 需要用一个新的基础方案将整个项目的代码重构，工作量上无法接受，放弃
+
+最终采用方案2：`module federation`。
+
+![](./img/micro-service-selection.jpg)
 
 ## 微前端实践
 
@@ -115,3 +132,20 @@
 - [x] 统一技术栈：本来就是一个项目
 - [x] 前端灰度发布
 
+
+
+## 学习链接
+
+感谢以下文章的作者/团队分享的文章，提供了很好的思路。
+
+1. [Module federation 原理研究](https://blog.towavephone.com/module-federation-principle-research/)
+2. [Revolutionizing Micro Frontends with Webpack 5, Module Federation and Bit](https://blog.bitsrc.io/revolutionizing-micro-frontends-with-webpack-5-module-federation-and-bit-99ff81ceb0)
+3. [How to Build a Micro Frontend with Webpack's Module Federation Plugin](https://dev.to/bitovi/how-to-build-a-micro-frontend-with-webpacks-module-federation-plugin-n41)
+4. [Webpack Module Federation](https://webpack.docschina.org/concepts/module-federation/)
+5. [Module Federation Examples](https://github.com/module-federation/module-federation-examples)
+6. https://medium.com/@A__G__B/introducing-fmr-federated-module-reloading-820ec56256db
+7. [EMP-面向未来微前端方案正式开源了！](https://juejin.cn/post/6891532248269783054)
+8. [micro-app 介绍](https://github.com/micro-zoe/micro-app/issues/8)
+9. [可能是你见过最完善的微前端解决方案](https://zhuanlan.zhihu.com/p/78362028)
+10. [字节跳动是如何落地微前端的](https://juejin.cn/post/7016900744695513125)
+11. [微前端在美团外卖的实践](https://tech.meituan.com/2020/02/27/meituan-waimai-micro-frontends-practice.html)
