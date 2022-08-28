@@ -36,11 +36,11 @@
 - `GET、POST、PUT、DELETE、PATCH、HEAD、OPTIONS、TRACE `
 - 请求报文：请求行 + 请求头 + 空行 + 请求体
 
-![](https://github.com/zhuoooo/markdown/blob/master/images/request.png?raw=true)
+![](img/request.png)
 
 - 响应报文：状态行 + 响应头 + 空行 + 响应体
 
-![](https://github.com/zhuoooo/markdown/blob/master/images/response.png?raw=true)
+![](img/response.png)
 
 ### POST和GET的区别：
 

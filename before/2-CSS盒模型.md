@@ -15,13 +15,13 @@
 
 - 标准模型
 
-  ![](https://github.com/zhuoooo/markdown/blob/master/images/boxmodel.gif?raw=true)
+  ![](./img/boxmodel.gif)
 
   > 在标准盒模型中：盒子占位= width + 2*margin + 2*padding + 2*border，高度与之一样。 
 
 - IE模型
 
-  ![](https://github.com/zhuoooo/markdown/blob/master/images/ie-box-model.jpg?raw=true)
+  ![](./img/ie-box-model.jpg)
 
   > 在IE模型中，盒子占位=width + 2*margin
 
