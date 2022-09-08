@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="61px" height="61px" viewBox="0 0 61 61" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>devops_apps_img_artifacts@1x</title>
+    <defs>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="65.8142597%" id="radialGradient-1">
+            <stop stop-color="#EDFAFF" offset="0%"></stop>
+            <stop stop-color="#E6F8FF" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="切图" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="DeVops平台改版图标" transform="translate(-1087.000000, -907.000000)">
+            <g id="编组-107" transform="translate(1087.932404, 907.597182)">
+                <g id="编组-59备份" fill="url(#radialGradient-1)">
+                    <rect id="矩形备份-11" x="0" y="0" width="60" height="60" rx="4"></rect>
+                </g>
+                <g id="编组-105备份" transform="translate(14.000000, 12.582774)" fill-rule="nonzero">
+                    <g id="编组-26" transform="translate(0.858788, 0.395834)">
+                        <path d="M30.404,9.6952582 L30.4049147,25.0700382 C30.4049147,25.545155 30.1744858,25.9874621 29.7925374,26.2602842 L29.6734862,26.3369096 L15.865,34.3082582 L15.981,27.6662582 L24.7110288,22.6272007 L24.711,12.9822582 L30.404,9.6952582 Z M6.712,23.2152582 L14.517,27.7202582 L14.403,34.2302582 L0.785,26.3672582 L6.712,23.2152582 Z M14.47,0.00625820453 L14.47,6.5802582 L5.69388595,11.6477519 L5.693,22.1002582 L0,25.1272582 L0,9.20491441 C-1.47119615e-15,8.72979757 0.230428923,8.28749053 0.612377363,8.01466838 L0.731428571,7.93804296 L14.47,0.00625820453 Z M15.933,0.00625820453 L29.902,8.07015535 L24.226,11.3671553 L15.933,6.5792582 L15.933,0.00625820453 Z" id="形状结合" fill="#40A9FF"></path>
+                        <polygon id="形状结合" fill="#91D5FF" points="15.9356622 -3.23520258e-13 29.8913718 8.0731682 24.2193611 11.3538174 15.9356622 6.56741859"></polygon>
+                        <polygon id="形状结合备份" fill="#91D5FF" transform="translate(7.646196, 28.764797) rotate(-180.000000) translate(-7.646196, -28.764797) " points="0.784078029 23.2211192 14.5083137 31.1499603 8.58199193 34.3084753 0.784078029 29.8017536"></polygon>
+                    </g>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
