@@ -1,0 +1,547 @@
+# 前端在 DevOps 演进中的基建实战
+
+![](./img/devops-cicd.jpg)
+
+前端在团队进行 DevOps 转型的期间，需要进行一些什么样子的基础建设呢？
+
+
+
+## 概述
+
+本系列整理了一下从传统的瀑布模式开发到 DevOps 研发运维一体化的整个演进过程。内容很多，但对于正在进行 DevOps 转型的团队能起到不小的帮助，请耐心看完本系列。
+
+DevOps（Development + Operations）是一组过程、方法与系统的统称，用于促进开发（应用程序/软件工程）、技术运营和质量保障（QA）部门之间的沟通、协作与整合。
+
+随着 DevOps 的兴起，出现了**持续集成（Continuous Integration）**、**持续交付（Continuous Delivery）** 、**持续部署（Continuous Deployment）** 的新方法。传统的软件开发和交付方法变得过时，“小步快跑”才是主流。在瀑布模式下，大多数公司会每月，每季度甚至每年发布新版本。现如今，在 DevOps 时代，每周，每天，甚至一天多次是常态。当 `PaaS` 正在占领世界时，我们可以轻松地动态更新应用程序，而无需强迫客户下载新组件。
+
+
+
+## 团队转型
+
+### 建立快速敏捷团队
+
+未转型前的团队结构和系统架构，一般分为七大部门：产品规划经理、视觉设计师、前端工程师、后端工程师、测试工程师、运维工程师、DBA等。各部门之间天然的形成了沟通障碍墙，相互之间主要以邮件和会议的形式沟通，效率低下、需求变更困难、很难快速响应市场变化和持续交付高品质的产品，如下图：
+
+![](./img/tradition-team.jpg)
+
+于是，我们对团队和架构进行一个调整：按照业务功能划分特性小组（Scrum 团队），设置产品负责人（一个规划人员）、Scrum Master（一般由技术专家级别担任）和开发者团队（前端工程师、后端工程师、测试）；这些团队负责自己的微服务同时要负责人员的管理。转型之后的组织结构和系统架构，如下图所示：
+
+![](./img/scrum-team.jpg)
+
+这是组织结构变化的部分，接下来讲一下前端架构的变化。
+
+
+
+### 微服务架构升级
+
+将原先的传统项目团队划分为多个 Scrum 小组并行开发，多小组同时发布的分支处理和代码冲突之类的问题频繁出现，前端发布几乎成为业务快速发布版本的阻塞点。目前，我们开发和维护代码的现状：
+
+![micro-service-bg.jpg](https://s2.loli.net/2022/08/10/C56vGFrqzAmUQxj.jpg)
+
+- 一个仓库包含了所有的业务组的前端代码；
+- 只能一起构建出一个整包，小组功能也无法单独部署；
+- 后端已完成微服务的拆分。
+
+如上所述，虽然一般场景通过 git 多分支管理能解决【独立开发】和【发布】的问题，但是遇到【多团队同时发布】的场景就让人头疼了：
+
+- 需要拉上各个团队的负责人，反复确认当天能否正常上线；
+- 上线分支排列组合（release-a、release-b、release-ab ）预防某一个团队突发问题不上线；
+- 测试工作量增加：原本只要验收一个代码包，现在还要验证多个代码包功能（> 1）。
+
+既然梳理了已有问题，为了解决这些问题，我们意识到和后端一样将整个项目拆分成若干的子应用，将它们也变成微服务，不就可以解决目前的困境了吗？自然而然我们就想到了“微前端”的概念。有目标，就好发力了，我们参考了业务优秀方案，同时结合了自身实际情况，最终决定用`webpack5 module federation `特性来进行微前端的实践与落地。
+
+#### 架构解耦
+
+制定了整个前端微服务方案后，我们的项目整体的架构变成了如下图展示的样子：
+
+![](https://s2.loli.net/2022/08/10/bWcORPIsSeodwkh.jpg)
+
+前端侧的代码按照小组特性拆分成若干个子应用：
+
+- 每个子应用只拥有自己相关的代码，基座应用可以看成比较特殊的子应用，它提供工程能力，最好不要有业务代码；
+- 将应用代码划分到 `packages/apps`文件下， 通过 `monorepo + pnpm` 进行管理依赖；
+- 所有的文件夹进行单独的打包构建，搭配  `Docker + Kubernetes` 构建成单独的容器（红色部分内所有的子应用都是单独的容器）变成真正的微服务。
+
+以上的变化，让拆分出来的子应用能够独立开发 - 维护 - 发布之外，还使得我们前端应用升级时的 灰度 - 部署 - 回滚 操作变得更加简单、快速。
+
+
+
+#### 构建解耦
+
+各个小组的前端代码存放在 `packages/*` 下，前端代码仓库目录：
+
+```
+platform
+│  package.json
+│
+└─packages
+   │  app1
+   │  app2
+   └─ app3
+```
+
+
+
+当每次更新代码时，会识别目标路径，单独构建产生变更的子应用，而不是以往的全量构建。如下图：
+
+![](./img/micro-build.jpg)
+
+
+
+#### 发布解耦
+
+在达成独立部署上线的目标之后，所有的子应用都是独立的，发布不需要依赖于任何应用。只需要确认开发修改了哪些子应用的代码，那么升级对应的子应用即可。如下图：
+
+![](https://s2.loli.net/2022/08/10/3h5cyOwTkZlsJ64.jpg)
+
+具体流程：
+
+1. 开发修改了 A 应用的代码，上库；
+2. 构建平台（千流，公司自建）识别到 A 应用产生了代码变更，接着对 A 应用进行打包，生成镜像、版本号等，推送到制品库；
+3. 升级对应服务。
+
+
+
+#### 配置解耦
+
+在很多发布场景中，一个棘手的问题是：不仅应用存在代码层面的改动，还有伴随着特有的环境配置之类的改动，所以在发布时经常需要根据情况修改和选择正确的配置。但其实这个配置和应用代码一样，本身就是发布的一部分，而传统的通过控制台去维护的方式成本将会非常高。
+
+举个例子：前端和  `nginx` 配置打交道比较多，像配置跨域、`gzip`  这些。那么这些 `nginx` 配置，我们可以通过 helm 编排的方式，搭配上镜像一同发布到环境上。这样就能优雅的解决配置类的发布问题了。
+
+
+
+### 总结
+
+一个高效的敏捷团队是 DevOps 能落地的保障，那么自动化流程就是保证产品快速交付和持续部署的有效机制，接下来为大家介绍我们是如何实现自动化流程的。
+
+
+
+## 持续集成（Continuous Integration）
+
+在瀑布模型的开发模式中，每个人都是在自己的开发分支上进行代码管理，直到各自模块完成再进行代码整合。整合过程的过程中非常痛苦：
+
+1. 合并过程中的代码冲突；
+2. 模块联动功能无法工作，需要进行一个再联调过程；
+3. 主程序员每日需要阅读大量的代码；
+4. 个人的代码质量不可控，以及过程风险无法及时透明；
+5. ...
+
+那么，持续集成是一种在开发周期的早期阶段进行集成的实践，以便构建、测试、整合代码可以更经常进行。
+
+在 CI 中，同版本内的甲和乙同时在进行开发，他们每完成一个小功能（也可以按每天）就需要将代码提交到 `GitLab` 共同分支上，进行自动化构建，如果发现错误，可以及时修改几乎不需要什么排查成本。
+
+CI 将整合过程变得日常化，这有利于我们在早期尽早发现集成错误，使团队更加紧密结合，更好地协作。
+
+![](./img/ci.png)
+
+
+
+### 完整流程
+
+1. 开发提交本地代码触发 `git hooks`校验（`eslint`、`i18nlint`、`stylelint`、`commitlint`）
+1. 推送到 `GitLab`，触发代码门禁（静态代码扫描、单元测试）；
+2. 通过门禁后，将前端代码打包，获得一个 `platform.tar.gz` (包括`dist`、`Makefile`、`Dockerfile`、`chart`)；
+3. 获取 `version`、 `dist` 和 `Dockerfile`，进行构建镜像；
+4. 获取 `version`、`chart` 进行 helm 包构建；
+5. （可选）构建完之后，结合 `Lighthouse` 对每次的包进行一次性能分析。
+
+
+
+### 容器化
+
+容器化是指将软件代码和所需的所有组件（例如库、框架和其他依赖项）打包在一起，让它们隔离在自己的”容器“中。
+
+这样，容器内的软件或应用就可以在任何环境和任何基础架构上一致地移动和运行，不受该环境或基础架构的操作系统影响。
+
+![](./img/docker-architecture.svg)
+
+
+
+容器之所以具有“轻量级”或“可移植”的特性，是因为它们能够共享主机的操作系统内核，不需要为每个容器提供单独的操作系统，且允许应用在任何基础架构（裸机、云）上运行相同的操作系统，甚至在虚拟机（VM）中。
+
+![](./img/vm-container.png)
+
+不管是虚拟机还是容器，似乎对前端而言，只要能让客户端加载到前端资源就没有什么区别。只不过推荐前端代码单独作为容器进行管理，而不是将前端资源存放在后端的服务中，对于前端想要进行一些架构改进能预留很大空间，而不会受限于外部。
+
+再回头看我们刚将一个前端的巨石应用拆分成若干（1 -> n）个的微服务，就对应需要 n 个镜像。
+
+![](./img/micro-fe.jpg)
+
+
+
+### 分支模型
+
+- master：主线分支，基线归档。只接受 hotfix 以及 release 合入，不允许直接修改push。
+- hotfix：线上版本bug的热修复分支，hotfix一般基于master拉出来，更新分支之后会自动执行端到端测试，修复完后合入到master。
+- release：预发布（测试）主线分支。预发布分支，用于功能开发完成后的最后修改工作，更新分支之后会自动执行端到端测试。
+- develop：开发主干分支。用于开发人员新加功能、修复bug，合入 release 后转测。
+- feature：个人功能开发分支，命名：feature-功能特性-作者。
+- bug：修改 bug 的分支，命名：bug-缺陷ID-作者。
+- tag：对发布过的版本代码进行标记，有助以后有需要时进行回溯，命名:tag_ 发布时间 _版本号
+
+![分支模型](https://s2.loli.net/2022/08/10/9d2k4f86qUjtXFN.png)
+
+
+
+## 持续交付（**Continuous Delivery**）
+
+持续交付是持续集成的延伸或者看作持续集成的下一步，它将集成后的代码部署到类生产环境，确保可以以可持续的方式快速向客户发布新的更改。
+
+持续交付意味着每次甲或乙对代码进行更改、集成和构建时，他们也会在与生产环境非常相似的状态下进行自动化代码测试。我们称这一系列的“部署 - 测试”到不同环境的操作为部署流水线。通常来说，部署流水线有一个开发环境，一个测试环境，还有一个准生产环境，但是这些阶段因团队，产品和组织各异。例如，我们团队有一个称为“演练环境”的准生产环境。（译注：消除开发环境和生产环境差异，参考Docker技术体系）
+
+持续交付最小化部署或释放过程中固有的摩擦。它的实现通常能够将构建部署的每个步骤自动化，以便任何时刻能够安全地完成代码发布（理想情况下）。
+
+![](./img/cd.png)
+
+
+
+### 完整流程
+
+1. 获取持续集成中的产物 `platform.tar.gz` ；
+2. 获取镜像 `platform`，然后推送到远程仓库；
+3. 获取 helm 包 `platform`，然后推送到远程仓库；
+4. 镜像和 helm 包成功推送到远程仓库之后，测试接收到新包的通知，进行一个包部署，验证功能；
+5. （可选）执行 E2E 自动化测试用例；
+6. 最后进行发布流程申请。
+
+
+
+### 看前端
+
+我们交付的产物大多是以 `webpack` 构建之后的产物 `dist  ` 包（包含`HTML`、`JS`、`CSS`、附件等）传递给测试，他们拿着这个包再到服务器上进行资源替换。
+
+在以前，我们是这样进行交付的：
+
+1. 在 `gitlab` 上执行流水线构建产物；
+2. 通过 `shell` 脚本自动化上传产物到目标服务器并进行一个资源替换和备份；
+2. 测试验证通过，进行生产环境发布。
+
+我们以前的流水线是从编译构建，一直编排到测试验证到生产环境发布。而在持续集成和持续交付分离后，交付流水线则需要进行单独设计。
+
+![](img/ci-dev.jpg)
+
+在 DevOps 和容器化的时候，整个自动化部署过程发生了变化，即：
+
+1. 编译构建完先制作镜像；
+
+2. 再推送到制品库；
+
+3. 最后再从制品库提取镜像 + 配置信息进行部署。
+
+我们同样的一个 Docker 镜像，同样的一份 helm 文件，可以在不同的环境中使用，这样就能够保证从开发、测试、上线所有东西的一致性。
+
+
+
+### 测试
+
+在完成了 DevOps 和容器化的改变后。我们接下来考虑另一个重点内容：**测试和质量管理**。
+
+对于测试和质量管理包括了很多内容，如下：
+
+1. 静态测试：代码规范性检查，安全检查，漏洞扫描；
+2. 自动化测试：单元测试，UI 端到端测试、接口测试。
+
+测试本身是一个系统工程，需要覆盖从测试场景分析，测试设计，测试执行，测试评估完整生命周期。中间还需要对测试用例脚本，测试数据等进行管理。
+
+而从 DevOps 实施角度，更多的是考虑整个测试过程如何自动化，通过将测试过程集成和编排到整个 DevOps 流水线执行过程中，真正实现研发和 QA 之间的自动化协同能力。
+
+我们前端主要通过 3 个节点自动执行测试的工作：
+
+1. 提交代码时：这个环节主要通过 `eslint`、`I18nlint`、`stylelint ` 保证增量提交的代码不存在低级规范问题，`commitlint` 保证提交信息规范化。
+2. 推送代码到 `GitLab` 后：这个环节有两个步骤：代码静态扫描和组件测试。前者保证代码基本质量，如：checklist、安全问题等；后者保证业务代码的功能是否正常。
+3. 合并代码到转集成分支后：这个环节在版本转测时，测试同事还未开始手动执行用例之前，需要进行一次全量的端到端测试用例的执行。
+
+
+
+## 持续部署（Continuous Deployment）
+
+持续部署是持续交付的下一步，在持续交付的基础上，由开发人员或运维人员自助式的定期向生产环境部署稳定的构建版本，持续部署的目标是代码在任何时刻都是可部署的，并可自动进入到生产环境。
+
+这是一种实践，即：甲和乙所做的每一项变更，在通过所有的测试阶段之后，自动部署到生产环境。Tim Fitz首先提出了一个很好的解释：有些公司这么干，有些则不这样做。想要实现持续部署，首先要实现持续交付。因此在开始实践 CD 之前，决定哪个更适合你是不重要的。无论哪种方式，我认为持续交付是关于有助于整个业务能力的事情，因此你至少应该参与决定是否使用持续部署。毕竟，如果你正在阅读这篇文章，那么你可能就是在“业务方面”。
+
+![](./img/cd2.png)
+
+
+
+### 完整流程
+
+1. 转集成测试结束后，确认上线的镜像和 helm 包版本号 `version`（在上线的工单中需要填写）；
+1. 运维同事在持续部署平台上，一键执行升级流水线，等待执行完毕就是升级成功了。
+
+
+
+![](img/cd.jpg)
+
+### 持续部署实践
+
+#### 蓝绿部署（Blue-Green Deployments）
+
+蓝绿部署是指有两个完全相同的、互相独立的生产环境，一个叫做“蓝环境”，一个叫做”绿环境“。绿环境是用户正在使用的生产环境。当要部署一个新版本的时候，先把这个新版本部署到蓝环境中，然后在蓝环境中运行冒烟测试，来检查是否正常工作，当一切准备就绪以后，向新版本迁移就非常简单了，只要修改一下路由配置，将用户流量从绿环境导向蓝环境就可以，这个时候蓝环境就变成了生产环境，这种切换通常在一秒钟之内就能搞定。如果出了问题，把路由器切回到绿环境上即可，然后在蓝环境中调试，找到问题的原因。所以蓝绿部署，是在部署之后，仅仅一次切换，立刻就向所有用户推出新版本，新功能对所有用户立刻生效可见。
+
+如果由于成本和投资回报的考虑，不能建设两套完全一样的生产环境，那么可以将蓝环境作为预发或预生产环境，将软件的新版本部署在预发环境，并进行验收测试，之后将访问流量引流到这个预发环境，那么蓝环境就是正式的生产环境，同时保持旧版本所在的绿环境不变，直至新版本没有问题后，再将旧版本所运行的环境作为下一个新版本的预发环境。
+
+#### 滚动部署（Rolling Deployment）
+
+滚动部署是指从服务集群中选择一个或多个服务单元，停止服务后执行版本更新，再重新将其投入使用，循环往复，直至集群中所有的服务实例都更新到新版本，而不是将所有的服务实例一次性的同时更新。
+
+滚动部署分批进行部署，每次同时更新的服务实例数称之为窗口大小（Window size），根据需要配置每个批次服务实例的窗口大小，例如首先部署2%的服务实例，第二批为10%，第三批为50%，第四批为100%。
+
+
+
+## 持续监测
+
+在完成了持续部署的改变后。我们接下来考虑另一个重点内容：**上线后的持续监控运维**。
+
+持续监视为交付不同阶段的应用程序的操作，质量保证，开发，业务线所有者和其他利益相关者提供数据和指标。度量标准不限于生产。
+
+一套完善的监控体系大概包含了：
+
+1. 基础设施监控
+2. 系统层监控
+3. 应用层监控
+4. 业务监控
+5. 端用户体验监控
+
+本文我们只分享**端用户体验监控**：用户通过浏览器打开我们产品，那么在用户端，用户的体验是怎么样？用户端的性能是怎么样？以及有没有产生错误等等。这些信息都需要进行监控并记录下来，如果没有监控，有可能因为某些BUG或者性能问题，造成用户体验非常差，而我们并没有感知。
+
+![](img/monitor.jpg)
+
+
+
+### Sentry
+
+#### 异常采集
+
+#### 数据储存
+
+#### 统计分析
+
+#### 报告告警
+
+
+
+### Matomo
+
+
+
+## 组件中台
+
+## 质量内建
+
+## 环境准备
+
+
+
+### 制作前端编译环境镜像
+
+因为前端代码需要在 `node` 环境上进行打包，并且我们希望在这个环境上可以加一些和项目相关的工具，例如：`pnpm`、`eslint` 等等高度定制的打包环境，因此我们需要制作一个项目特定的打包环境镜像用来进行项目打包。具体配置如下：
+
+```dockerfile
+# Dockerfile images: web-pipeline
+FROM centos:7
+
+ARG NODE_VERSION
+COPY CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+
+RUN yum makecache && yum update -y \
+    && yum install -y git \
+    && yum -y install wget \
+    && mkdir /usr/local/webui-env \
+    # 安装 node 环境
+    && wget wget http://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz \
+    && tar -xvf node-v${NODE_VERSION}-linux-x64.tar.xz -C /usr/local/webui-env \
+    && ln -s /usr/local/webui-env/node-v${NODE_VERSION}-linux-x64/bin/node /usr/bin/node \
+    && ln -s /usr/local/webui-env/node-v${NODE_VERSION}-linux-x64/bin/npm /usr/bin/npm \
+    # 可安装一些项目里面全局的内容，定制
+    # 安装 pnpm
+    && npm install pnpm -g \
+    && ln -s /usr/local/webui-env/node-v${NODE_VERSION}-linux-x64/lib/node_modules/pnpm/bin/pnpm /usr/bin/pnpm
+```
+
+
+
+### 制作 Lighthouse 环境镜像
+
+`Lighthouse` 是一个开源的分析网页质量的自动化工具。我们可以运行它对构建完之后的前端代码进行一个性能、可访问性、搜索引擎优化等分析。
+
+因此，我们每一次修改完代码，打包之后，还会执行进行 `lighthouse` 的性能分析，收集每个包过程中的性能分析的报告，用于分析网页质量，及早发现项目中存在的质量问题。在出现性能之类的质量问题时，因为我们每一次的打包都有报告，所以我们可以十分方便定位到具体的提交，从而减少排查性能问题的时间。
+
+```dockerfile
+FROM centos:7
+
+ARG NODE_VERSION
+ENV WEBUI_DIR=/usr/local/webui-env
+
+COPY CentOS-Base.repo /etc/yum.repos.d/CentOS-Base.repo
+
+COPY google-chrome-stable_current_x86_64.rpm /google-chrome-stable_current_x86_64.rpm
+
+# 安装git、sshpass、wget以及创建软件放置目录
+RUN yum makecache && \
+    # 安装git
+    yum install git -y && \
+    # 安装sshpass
+    yum install sshpass -y && \
+    # 安装wget
+    yum install wget -y && \
+    # 安装 chrome 浏览器
+    yum install /google-chrome-stable_current_x86_64.rpm -y && \
+    # 创建前端软件包的安装目录
+    mkdir -p ${WEBUI_DIR}
+
+# 安装 node 环境
+RUN cd ${WEBUI_DIR} && \
+    wget wget http://nodejs.org/dist/v${NODE_VERSION}/node-v${NODE_VERSION}-linux-x64.tar.xz \
+    && tar -xvf node-v${NODE_VERSION}-linux-x64.tar.xz -C /usr/local/webui-env \
+    && ln -s /usr/local/webui-env/node-v${NODE_VERSION}-linux-x64/bin/node /usr/bin/node \
+    && ln -s /usr/local/webui-env/node-v${NODE_VERSION}-linux-x64/bin/npm /usr/bin/npm \
+
+    # 安装pnpm
+    npm install -g pnpm@6.32.3 && \
+    ln -s ${WEBUI_DIR}/node-v${NODE_VERSION}-linux-x64/bin/pnpm /usr/local/bin/ && \
+    ln -s ${WEBUI_DIR}/node-v${NODE_VERSION}-linux-x64/bin/pnpx /usr/local/bin/
+```
+
+
+
+### 制作自动化测试镜像
+
+项目用的是 `Cypress`，所以这里直接使用它官网提供的镜像即可。
+
+```dockerfile
+FROM cypress/base:16.4.0
+
+# 安装 pnpm
+RUN npm install -g pnpm
+
+CMD echo  " node version: $(node -v) \n" \
+    "pnpm version: $(pnpm -v) \n"
+```
+
+
+
+### Makefile 
+
+可能对于 `Makefile` 不太熟悉，这里稍微解释一下：`Makefile` 可以简单的认为是一个工程文件的编译规则，描述了整个工程的编译和链接等规则。像我们项目不仅要进行【代码构建】、【镜像构建】、【helm 制作】等很多操作。
+
+1. 把各个环节需要进行的操作分散在各个平台明显对后续维护不友好，上手成本高，而且每个项目的配置很可能不同；
+2. 如果配置信息发生改变，这么多平台很难保证都能及时进行修改。
+
+因此，使用 `Makefile` 将这些构建操作和仓库代码放在一起管理更好。具体配置：
+
+#### 项目配置
+
+```makefile
+# makefile v0.0.1
+BRANCH := $(strip $(CI_BUILD_REF_NAME))
+DATE := $(shell date +%Y%m%d)
+
+.PHONY: install clean build
+
+# helm 构建并推送
+push_helm:
+	@cd chart && helm package platform-portal --version $(VERSION)
+	@sfspm upload ./chart/platform-portal-$(VERSION).tgz $(HELM_REPOSITORY)
+
+# 镜像构建
+push_image:
+	@echo build image for sase-platform-portal:$(VERSION)
+	# 从将当前目录编译成镜像
+	@docker build -t $(REPOSITORY_PATH)/$(REPOSITORY_KEY)/sase-platform-portal:$(VERSION) .
+	# 推送镜像到harbor仓库
+	@docker push $(REPOSITORY_PATH)/$(REPOSITORY_KEY)/platform-portal:$(VERSION)
+	# 删除本地镜像
+	@docker rmi $(REPOSITORY_PATH)/$(REPOSITORY_KEY)/platform-portal:$(VERSION)
+	
+lighthouse:
+	@echo performance analysis for sase-platform-portal:$(VERSION)
+	@lhci autorun
+
+# 前端打包规则
+build:
+	# 编译打包
+	@pnpm install
+	@pnpm build
+	# 将版本信息都加到容器内部
+	@echo $(BRANCH)-$(VERSION)-$(DATE) > ./dist/appversion
+	# 打包
+	@tar -zcvf platform_$(BRANCH)_$(VERSION)_$(DATE).tar.gz Makefile Dockerfile dist chart
+```
+
+#### 使用
+
+在 `Unix` 环境下，存在 `Makefile`  下目录执行
+
+```shell
+make build
+make push_image
+make push_helm
+```
+
+
+
+### 交付物
+
+我们在 `web-pipeline` 环境下进行一个打包，这个镜像中，我们之前已经安装过了 `git` 、`node`、`pnpm` 等工具了。当我们触发打包操作时，它会先执行前端的编译，接着再进行制作镜像上传，最后制作 helm 包上传。
+
+
+
+#### 前端编译
+
+执行 `Makefile` 中的 `build` 获取 `platform.tar.gz` 包 
+
+```shell
+echo "【镜像打包】开始！"
+make build
+```
+
+
+
+#### 镜像制作
+
+获取项目中的 `Dockerfile` 和 `dist` 包
+
+```dockerfile
+# Dockerfile
+FROM nginx:1.21.0
+
+ENV NODE_ENV=production 
+
+RUN mkdir -p /usr/service/webui
+COPY ./dist /usr/service/webui
+
+CMD ["nginx", "-g", "daemon off;"]
+```
+
+接着执行 `Makefile` 中的命令。
+
+```shell
+make push_image
+```
+
+
+
+#### helm 制作
+
+获取项目中的 `chart` 和 `version` 全局变量；接着执行 `Makefile` 中的命令。
+
+```sh
+make push_helm
+```
+
+
+
+#### Lighthouse 性能分析
+
+```sh
+make lighthouse
+```
+
+
+
+### Sentry 平台搭建
+
+
+
+### Matomo 平台搭建
+

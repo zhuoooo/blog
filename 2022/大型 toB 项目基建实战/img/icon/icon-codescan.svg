@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="61px" height="61px" viewBox="0 0 61 61" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <title>devops_apps_img_codescan@1x</title>
+    <defs>
+        <radialGradient cx="50%" cy="50%" fx="50%" fy="50%" r="65.8142597%" id="radialGradient-1">
+            <stop stop-color="#F8FDFF" offset="0%"></stop>
+            <stop stop-color="#E6F8FF" offset="100%"></stop>
+        </radialGradient>
+    </defs>
+    <g id="Devops平台改版切图" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="画板" transform="translate(-413.000000, -1094.000000)">
+            <g id="编组-74备份" transform="translate(413.049185, 1094.969727)">
+                <g id="编组-4备份" fill="url(#radialGradient-1)">
+                    <rect id="矩形备份-11" x="0" y="0" width="60" height="60" rx="4"></rect>
+                </g>
+                <g id="编组-28" transform="translate(14.000000, 17.076190)" stroke="#4995FF" stroke-linecap="round" stroke-width="3">
+                    <path d="M1.89478063e-14,2.14525654 C15.9682469,5.22029385 24.8363025,14.2829861 26.6041667,29.3333333" id="路径-16"></path>
+                    <path d="M11.0479167,0.155208333 C20.4373441,3.42951389 26.4670316,9.81288552 29.1369792,19.3053232" id="路径-17"></path>
+                    <path d="M21.0268495,0 C25.2398526,2.23898486 28.5803819,5.79454042 31.0484375,10.6666667" id="路径-18"></path>
+                </g>
+            </g>
+        </g>
+    </g>
+</svg>
