@@ -78,7 +78,7 @@ Brotli 采用与 Gzip 使用相同的技术，并使用现代方法对其进行�
 - CSS 文件比 Gzip 小 17%
 - JavaScript 文件比 Gzip 小 14%
 
-**Brotli 的压缩比更好，而 Gzip 在压缩速度方面领先。**
+**Brotli的压缩速度不仅比gzip快，还能得到更小的文件。**
 
 ### 传输对比
 
@@ -108,9 +108,9 @@ http返回头：`Content-Encoding: br`
 
 
 
-### 在 Nginx 上启用Brotli
+### 在 Nginx 上启用 Brotli
 
-nginx目前并不支持Brotli算法，需要使用第三方模块，例如 [ngx_brotli](https://github.com/google/ngx_brotli) 进行实现。
+nginx 目前并不支持 Brotli 算法，需要使用第三方模块，例如 [ngx_brotli](https://github.com/google/ngx_brotli) 进行实现。
 
 下面是简单的安装步骤：
 
@@ -138,11 +138,13 @@ CMD ["-g", "daemon off;"]
 
 ### 前端支持 .br 
 
-前端产物支持 br 产物为非必须项，出了更好，能够减少服务端动态压缩的工作。
+前端产物支持 br 产物为非必须项，但建议处理，能够减少服务端动态压缩的工作。
 
 webpack 配置：
 
 ```js
+// npm i compression-webpack-plugin -D
+
 const CompressionPlugin = require('compression-webpack-plugin');
 const zlib = require('zlib'); // node 自带库。只要版本不是太低（> 11 ?）就有
 
@@ -166,13 +168,57 @@ new CompressionPlugin({
 
 
 
-### Nginx 配置文件的 http 块下增加以下指令
+### Nginx 配置
 
-```shell
-brotli               on;  
-brotli_comp_level    6;  
-brotli_buffers       16 8k;  
-brotli_min_length    20;  
-brotli_types         *;
+http 配置添加一下内容
+
+```nginx
+
+# ...
+http {
+
+    brotli               on;
+    brotli_comp_level    4;
+    brotli_buffers       16 8k;
+    brotli_min_length    20;
+    brotli_types 		 text/plain text/css application/javascript application/json image/svg+xml application/xml+rss;
+    
+    # gzip 配置保留，当浏览器不支持时，可以自动降级
+    gzip on;
+}
+
+# ...
 ```
+
+#### brotli
+
+响应是否即时压缩，值：`on|off`。
+
+#### brotli_static
+
+检查 .br 预压缩文件的存在，值：`on|off|always`。设置了 always ，不检查客户端是否支持 `br`，直接使用预压缩文件。
+
+#### brotli_types
+
+对指定的MIME类型的响应进行即时压缩。
+
+像JPEG、PNG、MP4这样的二进制文件，已经用特定格式的压缩方式压缩过了，比 gzip 和 brotli 的压缩方式要好。
+
+对PNG进行 `gzip` 或 `brotli` 是没有意义的：PNG已经被压缩了，它将变得更大而不是更小。
+
+所以要使用`brotli_types text/plain text/css application/javascript application/json image/svg+xml application/xml+rss`
+涵盖HTML（默认包含）、纯文本、JavaScript、JSON、SVG和RSS。
+
+#### brotli_comp_level
+
+设置即时压缩 Brotli 压缩级别，值范围：`0~11`。在 nignx 上配置的 brotli 等级的策略：
+
+- 对于静态资源，使用 11 来压缩它们得到预压缩的 .br 文件 —— 因为服务器在响应请求时会优先读取 .br 文件，这样就可以为每个请求立即提供文件。
+- 对于动态内容，使用 4，它压缩所需要的时间和文件压缩比是平衡的，既不会导致过长的响应时间又能保证文件体积不大。
+
+#### 对接口的影响
+
+如果后端服务（响应头）接口已经添加了 `gzip` ，那么 `nginx`不会以`brotli`方式重新压缩。
+
+在后端服务器上禁用`gzip`，在nginx上使用`brotli`。
 
