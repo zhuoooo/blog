@@ -13,6 +13,52 @@
 3. `webpack-image-resize-loader` 是一个 webpack 加载器，它可以对图片进行缩放和裁剪，并输出多个尺寸的图片。该插件使用 `sharp` 库进行图片处理。
 4. `responsive-loader`是一个可以自动将图片转换为响应式图片的 webpack 加载器。它可以根据需要生成多种尺寸的图片，并在页面中根据需要加载相应尺寸的图片，从而提高页面的加载速度。
 
+## CDN
+
+
+
+## 预加载
+
+### import
+
+可以在使用 `import()` 导入异步模块时，添加 `webpack` 内置的注释实现预加载。例如：
+
+```js
+import(/* webpackPreload: true */ './someModule.js');
+```
+
+这样就会在当前 chunk 加载完毕后，预加载 `someModule.js`。如果预加载的模块已经在当前页面中被加载过了，则不会再次发起请求，直接使用缓存的模块。
+
+### 动态 JS
+
+如果是通过动态添加 JS 的方式，可以使用 `link` 标签的 `as` 属性来实现预加载。`as` 属性可以用来告诉浏览器预加载资源的类型，例如：
+
+```html
+<link rel="preload" href="dynamic.js" as="script">
+```
+
+这个标签会告诉浏览器预加载 `dynamic.js` 文件，并且将其标记为脚本文件类型。当文件需要使用时，浏览器就可以直接从预加载的缓存中获取，而不需要重新下载。同时，也可以通过 `onload` 事件来检查预加载的资源是否已经加载完成，避免重复加载。例如：
+
+```js
+const script = document.createElement('script');
+script.src = 'dynamic.js';
+script.onload = function() {
+  // 动态添加的 js 已经加载完成，可以进行操作
+};
+document.head.appendChild(script);
+```
+
+需要注意的是，预加载的资源不会自动执行，需要在需要使用的时候手动执行。如果需要自动执行，可以将预加载的资源标记为 `preload` 和 `as="script"`，并且在需要使用时添加 `defer` 属性。例如：
+
+```js
+<link rel="preload" href="dynamic.js" as="script">
+<script src="main.js" defer></script>
+```
+
+这样，`main.js` 文件会在页面渲染完成后自动执行，而 `dynamic.js` 文件会在 `main.js` 执行前提前加载到浏览器缓存中，可以提高网页加载速度。
+
+
+
 ## HTTP2
 
 HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供了更快、更可靠、更安全的网络传输。
@@ -23,7 +69,7 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 4. 流量控制：HTTP/2 提供了流量控制机制，可以避免因网络拥塞而导致的延迟和连接中断，提高了网络传输的可靠性。
 5. 安全性：HTTP/2 采用了 TLS 加密协议作为底层传输协议，可以提供更高的安全性，避免中间人攻击和数据泄漏。
 
-### 基本概念
+### 指标概念
 
 浏览器在 Network Timing 面板中会展示以下信息：
 
@@ -31,7 +77,7 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 
 2. Stalled：该请求可能因排队中描述的任何原因而停滞。
 
-   1. stalled 时间通常会影响请求的总时间，因为请求的总时间是由各个阶段的时间相加得出的。如果 stalled 时间很长，说明网络传输或服务器响应较慢，可能需要优化网络或服务器端的性能，以减少页面加载时间，提高用户体验。
+   - stalled 时间通常会影响请求的总时间，因为请求的总时间是由各个阶段的时间相加得出的。如果 stalled 时间很长，说明网络传输或服务器响应较慢，可能需要优化网络或服务器端的性能，以减少页面加载时间，提高用户体验。
 
       需要注意的是，stalled 时间是浏览器测量的，因此它不一定是实际网络传输或服务器响应的时间。此外，在某些情况下，stalled 时间可能会因为浏览器或系统的其他操作（例如其他程序的使用）而增加。所以，在进行性能测试时，需要进行多次测试，以消除这些干扰因素。
 
@@ -87,6 +133,14 @@ HTTP1.1 和 HTTP/2 请求速度对比图：
 
 ![](./img/http2network.png)
 
+### 浏览器兼容
+
+主流浏览器都支持。
+
+即使浏览器不支持HTTP/2，服务器会回退到HTTP/1.1。由于HTTP/2的升级策略：HTTP/2是一种透明的协议升级，也就是说它与HTTP/1.1兼容，并且只有在支持HTTP/2的情况下才会使用新的协议。因此，如果客户端不支持HTTP/2，服务器将返回HTTP/1.1版本的响应。
+
+![](./img/http2_caniuse.png)
+
 ### 项目改造
 
 在使用了 HTTP/2 之后，以往项目中使用的 HTTP/1.1 的优化方式可能需要进行一些调整或改正，以充分发挥 HTTP/2 的优势，例如：
@@ -113,11 +167,121 @@ HTTP/2 的另外两个功能也改变了处理 Web 优化的方式：**请求优
 
 ![](./img/projectstatus.png)
 
-#### 浏览器兼容
 
-![](./img/http2_caniuse.png)
 
-### 升级
+#### Nignx 配置
+
+1. 确认 Nginx 版本是否支持 HTTP/2。Nginx 1.9.5 及更高版本都支持 HTTP/2。
+2. 修改 Nginx 配置文件。在 `http` 配置块中添加以下代码：
+
+```
+markdownCopy codehttp {
+    server {
+        listen 443 ssl http2;
+        ...
+    }
+}
+```
+
+其中，`listen` 指令中需要加入 `http2` 参数来启用 HTTP/2 协议。
+
+3. 配置 SSL 证书。由于大多数浏览器都要求使用 HTTPS 协议来支持 HTTP/2，因此需要为 Nginx 配置 SSL 证书。可以使用免费的 Let's Encrypt 证书，也可以购买商业 SSL 证书。
+4. 重启 Nginx。完成以上修改后，需要重启 Nginx 服务才能使配置生效。
+
+
+
+#### Webpack 配置
+
+1. 启用 HTTP/2 服务端推送
+
+HTTP/2 可以通过服务端推送，在客户端请求某个资源时，主动将该资源所依赖的其他资源一起推送给客户端，减少了客户端等待的时间。在 webpack 中可以使用 `http2-push-manifest-webpack-plugin` 插件生成 manifest 文件，用于指定推送的资源。可以参考以下示例配置：
+
+```js
+const Http2PushManifestPlugin = require('http2-push-manifest-webpack-plugin');
+
+module.exports = {
+  // ...
+  plugins: [
+    // 生成 manifest 文件
+    new Http2PushManifestPlugin(),
+    // ...
+  ],
+  optimization: {
+    // 将第三方库单独打包
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+};
+```
+
+2. 启用多路复用
+
+HTTP/2 支持多路复用，可以在同一个连接上并发地传输多个资源。在 webpack 中可以通过 `optimization.splitChunks` 来进行模块分割，将不同的模块打包到不同的 chunk 中，从而实现多路复用。参考示例配置：
+
+```js
+module.exports = {
+  // ...
+  optimization: {
+    // 将第三方库单独打包
+    splitChunks: {
+      cacheGroups: {
+        vendor: {
+          test: /[\\/]node_modules[\\/]/,
+          name: 'vendors',
+          chunks: 'all',
+        },
+      },
+    },
+  },
+};
+```
+
+3. 启用更高级的压缩算法
+
+HTTP/2 支持更高级的压缩算法，如 Brotli。在 webpack 中可以使用 `brotli-webpack-plugin` 或 `compression-webpack-plugin` 插件来生成 Brotli 或 Gzip 格式的文件。示例配置：
+
+```js
+const CompressionWebpackPlugin = require('compression-webpack-plugin');
+const BrotliWebpackPlugin = require('brotli-webpack-plugin');
+
+module.exports = {
+  // ...
+  plugins: [
+    // 生成 Gzip 压缩文件
+    new CompressionWebpackPlugin({
+      algorithm: 'gzip',
+    }),
+    // 生成 Brotli 压缩文件
+    new BrotliWebpackPlugin(),
+    // ...
+  ],
+};
+```
+
+4. 提高加载速度，可以使用 `webpack-manifest-plugin` 生成一个文件清单，以便浏览器更快地加载资源。
+
+```js
+const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
+const options = { ... };
+
+module.exports = {
+  // ...
+  plugins: [
+    new WebpackManifestPlugin(options)
+  ]
+};
+```
+
+
+
+#### 升级注意项
 
 对于老项目升级到 HTTP/2，需要注意以下几个方面：
 
@@ -169,7 +333,7 @@ HTTP2可以通过设置优先级来控制静态资源的响应顺序，以提高
 
 
 
-## 网络传输 —— Brotli 压缩算法
+## Brotli 压缩算法
 
 GZIP 压缩是实现此目的的一种方法，但 [Brotli 压缩](https://www.brotli.org/) 是另一种值得关注的新兴方法，**Brotli是专门为网络设计的**。
 
