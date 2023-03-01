@@ -113,6 +113,10 @@ HTTP/2 的另外两个功能也改变了处理 Web 优化的方式：**请求优
 
 ![](./img/projectstatus.png)
 
+#### 浏览器兼容
+
+![](./img/http2_caniuse.png)
+
 ### 升级
 
 对于老项目升级到 HTTP/2，需要注意以下几个方面：
