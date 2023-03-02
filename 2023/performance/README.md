@@ -524,6 +524,14 @@ http {
 
 Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScript 线程，用于代理网络请求，并能够缓存数据，从而提高应用程序的性能和可靠性。Service Worker 在网页中被注册后，会被浏览器安装并运行在浏览器的进程中，不同于网页中运行的 JavaScript 代码，Service Worker 是在独立的上下文中运行。
 
+基本原理：
+
+- 当Service Worker 第一次注册时，它会安装并缓存应用的所有静态资源。
+- 当用户请求访问应用时，浏览器会检查Service Worker是否存在，并尝试加载它。
+- 如果Service Worker已经加载并处于活动状态，它会拦截所有应用发出的网络请求，检查是否有匹配的缓存资源。
+- 如果缓存中有匹配的资源，Service Worker将返回缓存中的内容，否则它将继续发送网络请求，并将响应缓存起来。
+- 当用户离线时，Service Worker可以从缓存中加载应用的所有静态资源，从而使应用在离线时也能正常访问。
+
 特点：
 
 1. 离线缓存：Service Worker 可以拦截网络请求并将请求的资源存储在缓存中，当用户下一次访问该资源时，可以直接从缓存中获取，无需再次请求网络。
@@ -531,6 +539,8 @@ Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScr
 3. 后台同步：Service Worker 可以在后台执行任务，例如在网络连接重新连接时同步数据。
 4. 安全性：由于 Service Worker 是在独立的上下文中运行，因此它不受网页中的 JavaScript 代码的影响，并且可以跨站点进行操作。但是由于其具有拦截网络请求的能力，也可能会引发安全问题。
 5. 有效的缓存策略：Service Worker 可以自定义缓存策略，从而更好地控制缓存资源的生命周期和版本控制。
+
+
 
 ### 使用
 
@@ -558,5 +568,46 @@ if ('serviceWorker' in navigator) {
 
 
 
+### 工具
 
+`workbox-webpack-plugin` 是一个可以简化 Service Worker 缓存实现的插件。通过该插件，可以轻松地实现 Service Worker 缓存前端静态资源，同时不缓存动态接口，提升页面加载速度和离线访问体验。
+
+webpack 配置：
+
+```js
+const { GenerateSW } = require('workbox-webpack-plugin');
+
+module.exports = {
+  // ...其他配置...
+  plugins: [
+    // 生成 Service Worker
+    new GenerateSW({
+      clientsClaim: true,
+      skipWaiting: true,
+      runtimeCaching: [
+        {
+          urlPattern: /^https?:\/\/your-api-domain\.com\//,
+          handler: 'networkFirst',
+        },
+      ],
+      exclude: [/\.map$/, /^manifest.*\.js$/, /^service-worker\.js$/],
+      cleanupOutdatedCaches: true, // 清理旧版本缓存
+    }),
+  ],
+};
+```
+
+注册 Service Worker
+
+```js
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/service-worker.js', { scope: '/' }).then(function(registration) {
+    console.log('Service Worker registered with scope:', registration.scope);
+  }).catch(function(err) {
+    console.log('Service Worker registration failed:', err);
+  });
+}
+</script>
+```
 
