@@ -119,19 +119,19 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 
 HTTP1.1 和 HTTP/2 请求速度对比图：
 
-![](./img/http1vshttp2.gif)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http1vshttp2.gif)
 
 #### HTTP1.1
 
 下图为HTTP1.1的图片请求，请求基本上是6个一组，然后6个完成后再 **串行请求** 下一组。
 
-![](./img/http1.1network.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http1.1network.png)
 
 #### HTTP/2
 
 从下方截图，可以清晰看到，所有请求基本都是并行请求，由于数据发送量较大，所以会有“等待”，这里的等待应该是数据流在客户端或服务器端重新组合的过程，正是因为这样所以单个请求时间相对更长。
 
-![](./img/http2network.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http2network.png)
 
 ### 浏览器兼容
 
@@ -139,7 +139,7 @@ HTTP1.1 和 HTTP/2 请求速度对比图：
 
 即使浏览器不支持HTTP/2，服务器会回退到HTTP/1.1。由于HTTP/2的升级策略：HTTP/2是一种透明的协议升级，也就是说它与HTTP/1.1兼容，并且只有在支持HTTP/2的情况下才会使用新的协议。因此，如果客户端不支持HTTP/2，服务器将返回HTTP/1.1版本的响应。
 
-![](./img/http2_caniuse.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http2_caniuse.png)
 
 ### 项目改造
 
@@ -151,7 +151,7 @@ HTTP/1.1 中的大多数网站优化技术尽可能减少源服务器的 HTTP �
 
 针对 HTTP/2 进行优化需要不同的思维方式。Web 开发人员不应担心减少 HTTP 请求，而应专注于调整其网站的缓存行为。一般规则是**运送小的、颗粒状的资源**，以便它们可以独立缓存并并行传输。
 
-![HTTP/2 多路复用](./img/http-2-multiplexing.png)
+![HTTP/2 多路复用](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-2-multiplexing.png)
 
 因为HTTP/2 的**多路复用**和**头部压缩功能。**
 
@@ -165,7 +165,7 @@ HTTP/2 的另外两个功能也改变了处理 Web 优化的方式：**请求优
 
 从下图中可以看到首屏的资源中，最长的 Stalled （灰色长方形）占据了整个资源加载周期的 1/2（数值：300ms），替换了 HTTP/2 后，在服务器带宽，可以有效的减少这部分的时间。
 
-![](./img/projectstatus.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/projectstatus.png)
 
 
 
@@ -192,36 +192,7 @@ markdownCopy codehttp {
 
 #### Webpack 配置
 
-1. 启用 HTTP/2 服务端推送
-
-HTTP/2 可以通过服务端推送，在客户端请求某个资源时，主动将该资源所依赖的其他资源一起推送给客户端，减少了客户端等待的时间。在 webpack 中可以使用 `http2-push-manifest-webpack-plugin` 插件生成 manifest 文件，用于指定推送的资源。可以参考以下示例配置：
-
-```js
-const Http2PushManifestPlugin = require('http2-push-manifest-webpack-plugin');
-
-module.exports = {
-  // ...
-  plugins: [
-    // 生成 manifest 文件
-    new Http2PushManifestPlugin(),
-    // ...
-  ],
-  optimization: {
-    // 将第三方库单独打包
-    splitChunks: {
-      cacheGroups: {
-        vendor: {
-          test: /[\\/]node_modules[\\/]/,
-          name: 'vendors',
-          chunks: 'all',
-        },
-      },
-    },
-  },
-};
-```
-
-2. 启用多路复用
+1. 启用多路复用
 
 HTTP/2 支持多路复用，可以在同一个连接上并发地传输多个资源。在 webpack 中可以通过 `optimization.splitChunks` 来进行模块分割，将不同的模块打包到不同的 chunk 中，从而实现多路复用。参考示例配置：
 
@@ -243,7 +214,7 @@ module.exports = {
 };
 ```
 
-3. 启用更高级的压缩算法
+2. 启用更高级的压缩算法
 
 HTTP/2 支持更高级的压缩算法，如 Brotli。在 webpack 中可以使用 `brotli-webpack-plugin` 或 `compression-webpack-plugin` 插件来生成 Brotli 或 Gzip 格式的文件。示例配置：
 
@@ -265,7 +236,7 @@ module.exports = {
 };
 ```
 
-4. 提高加载速度，可以使用 `webpack-manifest-plugin` 生成一个文件清单，以便浏览器更快地加载资源。
+3. 提高加载速度，可以使用 `webpack-manifest-plugin` 生成一个文件清单，以便浏览器更快地加载资源。
 
 ```js
 const { WebpackManifestPlugin } = require('webpack-manifest-plugin');
@@ -300,11 +271,11 @@ module.exports = {
 
 在 HTTP/1.1 中，由于浏览器对同一域名下的请求数量有限制，因此常常需要将多个 CSS、JavaScript 等资源合并成一个文件，以减少请求数量。但在 HTTP/2 中，由于支持多路复用，可以在同一连接上并发发送多个请求和响应，因此不再需要合并资源，反而可能会影响并发请求的效率。
 
-![HTTP/1.1 文件连接](./img/http-1-1-file-concatenation.png)
+![HTTP/1.1 文件连接](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-1-1-file-concatenation.png)
 
 因此在HTTP/2 中，合并文件不再是最佳实践。虽然它可以提高压缩率，但也会提高缓存失效的几率。因为只更改一行 CSS，对于浏览器也需要重新加载 CSS 文件。
 
-![HTTP/2 文件连接](./img/http-2-file-concatenation.png)
+![HTTP/2 文件连接](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-2-file-concatenation.png)
 
 Web开发者应该更加专注于缓存策略优化，而不是压缩文件。将经常改动和不怎么改动的文件分离开来，就可以尽可能利用CDN或者用户浏览器缓存中已有的内容。
 
@@ -393,11 +364,11 @@ Brotli 压缩算法具有多个特点，最典型的是以下 4 个：
 | 10       | 225.2 (79.7%) | 16.1 (83.4%) | 26.5 (86.6%) | 17.5 (88.4%) | 28.4 (68.3%) | 44.9 (75%)   |
 | 11       | 223 (79.9%)   | 15.8 (83.7%) | 25.9 (86.9%) | 17.2 (88.6%) | 28 (68.7%)   | 44.2 (75.3%) |
 
-![](./img/chart_html.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/chart_html.png)
 
-![](./img/chart_css.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/chart_css.png)
 
-![](./img/chart_js.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/chart_js.png)
 
 Brotli 采用与 Gzip 使用相同的技术，并使用现代方法对其进行增强：
 
@@ -423,7 +394,7 @@ Brotli 采用与 Gzip 使用相同的技术，并使用现代方法对其进行�
 
 主流浏览器基本上都支持了。
 
-![](./img/brotli_caniuse.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/brotli_caniuse.png)
 
 ### 服务器支持 Brotli 
 
@@ -550,3 +521,42 @@ http {
 在后端服务器上禁用`gzip`，在nginx上使用`brotli`。
 
 ## Service Work
+
+Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScript 线程，用于代理网络请求，并能够缓存数据，从而提高应用程序的性能和可靠性。Service Worker 在网页中被注册后，会被浏览器安装并运行在浏览器的进程中，不同于网页中运行的 JavaScript 代码，Service Worker 是在独立的上下文中运行。
+
+特点：
+
+1. 离线缓存：Service Worker 可以拦截网络请求并将请求的资源存储在缓存中，当用户下一次访问该资源时，可以直接从缓存中获取，无需再次请求网络。
+2. 消息推送：Service Worker 可以接收来自远程服务器的消息推送，即使用户关闭了应用程序或离线状态下。
+3. 后台同步：Service Worker 可以在后台执行任务，例如在网络连接重新连接时同步数据。
+4. 安全性：由于 Service Worker 是在独立的上下文中运行，因此它不受网页中的 JavaScript 代码的影响，并且可以跨站点进行操作。但是由于其具有拦截网络请求的能力，也可能会引发安全问题。
+5. 有效的缓存策略：Service Worker 可以自定义缓存策略，从而更好地控制缓存资源的生命周期和版本控制。
+
+### 使用
+
+```js
+// 注册 Service Worker
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', function() {
+    navigator.serviceWorker.register('/service-worker.js').then(function(registration) {
+      console.log('ServiceWorker registration successful with scope: ', registration.scope);
+    }, function(err) {
+      console.log('ServiceWorker registration failed: ', err);
+    });
+  });
+}
+
+// 注销 Service Worker
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.getRegistrations().then(function(registrations) {
+    for(let registration of registrations) {
+      registration.unregister();
+    }
+  });
+}
+```
+
+
+
+
+
