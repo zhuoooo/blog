@@ -19,7 +19,41 @@
 
 ## 预加载
 
-### import
+`prefetch`和`preload`都是一种浏览器预加载资源的机制，但是在具体实现和应用场景上有所不同。
+
+需要注意的是，`prefetch`和`preload`的使用需要根据具体情况进行权衡和选择。如果使用不当，可能会导致资源浪费或者页面性能问题。
+
+建议在页面稳定之后再进行预加载的操作。
+
+### prefetch
+
+- `prefetch`用于请求未来可能需要的资源，但并不一定会在当前页面中用到，因此请求的资源通常是次要的。
+- `prefetch`会在浏览器闲置时间加载，不会影响当前页面的加载速度。
+- 适用于在将来的某些页面中不那么重要的资源，例如下一个页面可能需要的图像或视频。
+
+```js
+const button = document.querySelector('#dynamic-button');
+
+button.addEventListener('click', () => {
+  import(/* webpackPrefetch: true */ './dynamic-module').then(module => {
+    // 动态模块加载成功后的回调
+  });
+});
+
+// <link rel="prefetch" href="dynamic.js">
+```
+
+需要注意：*通过在 HTML 中添加 link 标签来进行 prefetch 的方式，只能用于 prefetch 静态资源，对于动态资源无法使用。*
+
+
+
+### preload 
+
+- `preload`用于提前请求当前页面中必需的资源，以加速页面的加载速度。
+- `preload`会在当前页面加载时加载，因此可能会影响当前页面的加载速度。
+- 适用于当前页面必需的主要资源，例如页面的主要样式、脚本等。
+
+#### import
 
 可以在使用 `import()` 导入异步模块时，添加 `webpack` 内置的注释实现预加载。例如：
 
@@ -29,7 +63,7 @@ import(/* webpackPreload: true */ './someModule.js');
 
 这样就会在当前 chunk 加载完毕后，预加载 `someModule.js`。如果预加载的模块已经在当前页面中被加载过了，则不会再次发起请求，直接使用缓存的模块。
 
-### 动态 JS
+#### 动态 JS
 
 如果是通过动态添加 JS 的方式，可以使用 `link` 标签的 `as` 属性来实现预加载。`as` 属性可以用来告诉浏览器预加载资源的类型，例如：
 
@@ -520,7 +554,7 @@ http {
 
 在后端服务器上禁用`gzip`，在nginx上使用`brotli`。
 
-## Service Work
+## Service Worker
 
 Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScript 线程，用于代理网络请求，并能够缓存数据，从而提高应用程序的性能和可靠性。Service Worker 在网页中被注册后，会被浏览器安装并运行在浏览器的进程中，不同于网页中运行的 JavaScript 代码，Service Worker 是在独立的上下文中运行。
 
@@ -568,6 +602,32 @@ if ('serviceWorker' in navigator) {
 
 
 
+### 本地开发
+
+Service worker 需要 HTTPS 环境，并且需要受信任的证书，因此在本地开发环境绕开这个限制。
+
+- Chrome 浏览器：启动时添加 `--ignore-certificate-errors` 参数。
+- Firefox 浏览器：在浏览器地址栏中输入 `about:config`，找到并将 `security.enterprise_roots.enabled` 设置为 `true`，然后重启浏览器。
+- Safari 浏览器：在终端中输入以下命令以禁用证书验证：
+
+```shell
+defaults write com.apple.Safari AllowInvalidCertificates -bool true
+defaults write com.apple.Safari IncludeInternalDebugMenu -bool true
+```
+
+然后重启 Safari 浏览器，会出现 Debug 菜单，可以在菜单中找到 "Disable Certificate Checking" 选项并勾选它。
+
+#### 查看缓存
+
+在 Chrome 中，可以通过以下步骤查看 Service Worker 的缓存内容以及确认缓存是否被清除：
+
+1. 打开 Chrome 开发者工具，选择 Application 选项卡。
+2. 在左侧的面板中，选择 Cache -> Cache Storage。
+3. 这里会列出您的 Service Worker 在缓存中存储的所有资源，可以查看每个缓存的内容。
+4. 若要确认缓存是否被清除，可以在 Application 面板中选择 Service Workers，然后点击 Unregister 按钮。这将从浏览器中注销该 Service Worker，所有缓存的内容也将被删除。
+
+请注意，某些情况下，缓存的内容可能会被浏览器自动清除，例如缓存空间不足或缓存时间过期。
+
 ### 工具
 
 `workbox-webpack-plugin` 是一个可以简化 Service Worker 缓存实现的插件。通过该插件，可以轻松地实现 Service Worker 缓存前端静态资源，同时不缓存动态接口，提升页面加载速度和离线访问体验。
@@ -611,3 +671,77 @@ if ('serviceWorker' in navigator) {
 </script>
 ```
 
+### 结合 module-federation 进行预加载
+
+在构建时生成 Service Worker 文件，并通过 runtimeCaching 配置项指定需要预缓存的文件。这样在用户进入子应用页面时，就可以从缓存中快速加载相关文件，提升用户体验。
+
+```js
+const { GenerateSW } = require('workbox-webpack-plugin');
+
+module.exports = {
+  // ...
+  plugins: [
+    new GenerateSW({
+      swDest: 'sw.js',
+      runtimeCaching: [
+        {
+          urlPattern: /^https?:\/\/your-domain.com\/remoteEntry\.js/,
+          handler: 'StaleWhileRevalidate',
+          options: {
+            cacheName: 'remote-entry-cache',
+          },
+        },
+        {
+            urlPattern: isProd ?
+            /\/name\/((?!remoteEntry\.js).)*$/ :
+            /:10544((?!remoteEntry\.js).)*$/,
+            handler: 'StaleWhileRevalidate',
+            options: {
+                cacheName: 'name-app-cache',
+            },
+        },
+        // 更多需要预缓存的文件...
+      ],
+    }),
+  ],
+};
+```
+
+在上面的示例中，我们指定了需要预缓存的文件，包括远程入口文件 remoteEntry.js 和子应用相关文件，通过指定不同的 cacheName 可以将不同类型的文件缓存在不同的缓存中。
+
+然后，你可以在空余时间（比如在应用启动时）调用 Service Worker 的 skipWaiting 方法，让它立即接管页面并开始预缓存相关文件：
+
+```js
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('/sw.js').then(registration => {
+    registration.addEventListener('updatefound', () => {
+      const installingWorker = registration.installing;
+      if (installingWorker) {
+        installingWorker.addEventListener('statechange', () => {
+          if (installingWorker.state === 'installed') {
+            console.log('A new version is available; please refresh.');
+          }
+        });
+      }
+    });
+
+    // 跳过等待，立即接管页面
+    registration.waiting?.postMessage({ type: 'SKIP_WAITING' });
+  });
+}
+```
+
+`ServiceWorkerRegistration` 是用来管理 `Service Worker` 的注册、更新和卸载等操作的接口。其提供的周期事件包括：
+
+1. `updatefound`：当一个新的 `Service Worker` 被安装并开始取代当前正在使用的 `Service Worker` 时触发。可以通过该事件获取新的 `Service Worker` 实例。
+2. `update`：当新的 `Service Worker` 安装成功后触发，此时可以向新的 `Service Worker` 发送 `postMessage` 请求来通知其进行更新操作。
+3. `statechange`：当 `Service Worker` 状态发生变化时触发，比如 `installing`、`installed`、`activating`、`activated`、`redundant`。
+4. `controllerchange`：当控制当前页面的 `Service Worker` 发生变化时触发，比如页面第一次加载或者有新的 `Service Worker` 安装成功并激活时。
+
+这些周期事件可以通过 `navigator.serviceWorker.register` 注册 `Service Worker` 后，通过返回的 `ServiceWorkerRegistration` 实例进行监听。
+
+
+
+
+
+### 对灰度的影响？
