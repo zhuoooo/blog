@@ -1,5 +1,11 @@
 # 前端性能优化
 
+## 第三方库
+
+### echarts
+
+
+
 ## 图片压缩
 
 1. ImageOptim：ImageOptim 是一种优秀的图像压缩工具，可以自动压缩图片大小，从而减小图片文件大小。
@@ -14,8 +20,6 @@
 4. `responsive-loader`是一个可以自动将图片转换为响应式图片的 webpack 加载器。它可以根据需要生成多种尺寸的图片，并在页面中根据需要加载相应尺寸的图片，从而提高页面的加载速度。
 
 ## CDN
-
-
 
 ## 预加载
 
@@ -43,11 +47,9 @@ button.addEventListener('click', () => {
 // <link rel="prefetch" href="dynamic.js">
 ```
 
-需要注意：*通过在 HTML 中添加 link 标签来进行 prefetch 的方式，只能用于 prefetch 静态资源，对于动态资源无法使用。*
+需要注意：_通过在 HTML 中添加 link 标签来进行 prefetch 的方式，只能用于 prefetch 静态资源，对于动态资源无法使用。_
 
-
-
-### preload 
+### preload
 
 - `preload`用于提前请求当前页面中必需的资源，以加速页面的加载速度。
 - `preload`会在当前页面加载时加载，因此可能会影响当前页面的加载速度。
@@ -91,8 +93,6 @@ document.head.appendChild(script);
 
 这样，`main.js` 文件会在页面渲染完成后自动执行，而 `dynamic.js` 文件会在 `main.js` 执行前提前加载到浏览器缓存中，可以提高网页加载速度。
 
-
-
 ## HTTP2
 
 HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供了更快、更可靠、更安全的网络传输。
@@ -113,7 +113,7 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 
    - stalled 时间通常会影响请求的总时间，因为请求的总时间是由各个阶段的时间相加得出的。如果 stalled 时间很长，说明网络传输或服务器响应较慢，可能需要优化网络或服务器端的性能，以减少页面加载时间，提高用户体验。
 
-      需要注意的是，stalled 时间是浏览器测量的，因此它不一定是实际网络传输或服务器响应的时间。此外，在某些情况下，stalled 时间可能会因为浏览器或系统的其他操作（例如其他程序的使用）而增加。所以，在进行性能测试时，需要进行多次测试，以消除这些干扰因素。
+     需要注意的是，stalled 时间是浏览器测量的，因此它不一定是实际网络传输或服务器响应的时间。此外，在某些情况下，stalled 时间可能会因为浏览器或系统的其他操作（例如其他程序的使用）而增加。所以，在进行性能测试时，需要进行多次测试，以消除这些干扰因素。
 
 3. DNS Lookup：指浏览器对主机名进行 DNS 解析的时间。
 
@@ -133,8 +133,6 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 2. Pushed Stream：HTTP/2 中的服务器推送流（push stream）的时间。
 3. Resource Hints：HTTP/2 中的服务器提示资源（resource hints）的时间。
 
-
-
 ### 实际效果对比
 
 测试网站：http://www.http2demo.io/
@@ -149,15 +147,13 @@ HTTP/2 是一种现代化的网络传输协议，相对于 HTTP/1.x，它提供�
 2. Header 压缩。HTTP/2 使用 HPACK 算法对请求和响应头进行压缩，减少了请求和响应头的大小，从而减少了网络传输的数据量，提高了页面加载速度。
 3. 二进制协议。HTTP/2 将传输数据格式从 HTTP/1.1 的文本格式改为二进制格式，提高了传输数据的效率，减少了网络传输的数据量，从而加速了页面加载速度。
 
-
-
 HTTP1.1 和 HTTP/2 请求速度对比图：
 
 ![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http1vshttp2.gif)
 
 #### HTTP1.1
 
-下图为HTTP1.1的图片请求，请求基本上是6个一组，然后6个完成后再 **串行请求** 下一组。
+下图为 HTTP1.1 的图片请求，请求基本上是 6 个一组，然后 6 个完成后再 **串行请求** 下一组。
 
 ![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http1.1network.png)
 
@@ -171,7 +167,7 @@ HTTP1.1 和 HTTP/2 请求速度对比图：
 
 主流浏览器都支持。
 
-即使浏览器不支持HTTP/2，服务器会回退到HTTP/1.1。由于HTTP/2的升级策略：HTTP/2是一种透明的协议升级，也就是说它与HTTP/1.1兼容，并且只有在支持HTTP/2的情况下才会使用新的协议。因此，如果客户端不支持HTTP/2，服务器将返回HTTP/1.1版本的响应。
+即使浏览器不支持 HTTP/2，服务器会回退到 HTTP/1.1。由于 HTTP/2 的升级策略：HTTP/2 是一种透明的协议升级，也就是说它与 HTTP/1.1 兼容，并且只有在支持 HTTP/2 的情况下才会使用新的协议。因此，如果客户端不支持 HTTP/2，服务器将返回 HTTP/1.1 版本的响应。
 
 ![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http2_caniuse.png)
 
@@ -187,7 +183,7 @@ HTTP/1.1 中的大多数网站优化技术尽可能减少源服务器的 HTTP �
 
 ![HTTP/2 多路复用](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-2-multiplexing.png)
 
-因为HTTP/2 的**多路复用**和**头部压缩功能。**
+因为 HTTP/2 的**多路复用**和**头部压缩功能。**
 
 - 多路复用让多个请求共享一个 TCP 连接，允许多个资源并行下载，避免建立多个连接带来不必要的额外开销。这就消除了 HTTP/1.1 的队头阻塞问题。
 
@@ -200,8 +196,6 @@ HTTP/2 的另外两个功能也改变了处理 Web 优化的方式：**请求优
 从下图中可以看到首屏的资源中，最长的 Stalled （灰色长方形）占据了整个资源加载周期的 1/2（数值：300ms），替换了 HTTP/2 后，在服务器带宽，可以有效的减少这部分的时间。
 
 ![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/projectstatus.png)
-
-
 
 #### Nignx 配置
 
@@ -221,8 +215,6 @@ markdownCopy codehttp {
 
 3. 配置 SSL 证书。由于大多数浏览器都要求使用 HTTPS 协议来支持 HTTP/2，因此需要为 Nginx 配置 SSL 证书。可以使用免费的 Let's Encrypt 证书，也可以购买商业 SSL 证书。
 4. 重启 Nginx。完成以上修改后，需要重启 Nginx 服务才能使配置生效。
-
-
 
 #### Webpack 配置
 
@@ -284,8 +276,6 @@ module.exports = {
 };
 ```
 
-
-
 #### 升级注意项
 
 对于老项目升级到 HTTP/2，需要注意以下几个方面：
@@ -299,19 +289,17 @@ module.exports = {
 
 综上所述，升级老项目到 HTTP/2 需要进行一些配置和调整，并进行性能监测和测试，以确保能够充分发挥 HTTP/2 的优势，并提高页面加载速度和用户体验。
 
-
-
 #### 停止合并资源
 
 在 HTTP/1.1 中，由于浏览器对同一域名下的请求数量有限制，因此常常需要将多个 CSS、JavaScript 等资源合并成一个文件，以减少请求数量。但在 HTTP/2 中，由于支持多路复用，可以在同一连接上并发发送多个请求和响应，因此不再需要合并资源，反而可能会影响并发请求的效率。
 
 ![HTTP/1.1 文件连接](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-1-1-file-concatenation.png)
 
-因此在HTTP/2 中，合并文件不再是最佳实践。虽然它可以提高压缩率，但也会提高缓存失效的几率。因为只更改一行 CSS，对于浏览器也需要重新加载 CSS 文件。
+因此在 HTTP/2 中，合并文件不再是最佳实践。虽然它可以提高压缩率，但也会提高缓存失效的几率。因为只更改一行 CSS，对于浏览器也需要重新加载 CSS 文件。
 
 ![HTTP/2 文件连接](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/http-2-file-concatenation.png)
 
-Web开发者应该更加专注于缓存策略优化，而不是压缩文件。将经常改动和不怎么改动的文件分离开来，就可以尽可能利用CDN或者用户浏览器缓存中已有的内容。
+Web 开发者应该更加专注于缓存策略优化，而不是压缩文件。将经常改动和不怎么改动的文件分离开来，就可以尽可能利用 CDN 或者用户浏览器缓存中已有的内容。
 
 #### 停止内联资源
 
@@ -327,20 +315,16 @@ Web开发者应该更加专注于缓存策略优化，而不是压缩文件。�
 
 #### 请求优先级
 
-HTTP2可以通过设置优先级来控制静态资源的响应顺序，以提高性能。优先级可以分为高、中、低三个等级，其中高优先级的资源会优先响应，而低优先级的资源会最后响应。
-
-
+HTTP2 可以通过设置优先级来控制静态资源的响应顺序，以提高性能。优先级可以分为高、中、低三个等级，其中高优先级的资源会优先响应，而低优先级的资源会最后响应。
 
 #### 降低性能的场景
 
 1. 如果网站的内容太多，而服务器的带宽太小，那么使用 HTTP2 可能会导致加载速度降低。
 2. 如果网站的内容太复杂，而服务器的处理能力太低，那么使用 HTTP2 也可能会导致加载速度降低。
 
-
-
 ## Brotli 压缩算法
 
-GZIP 压缩是实现此目的的一种方法，但 [Brotli 压缩](https://www.brotli.org/) 是另一种值得关注的新兴方法，**Brotli是专门为网络设计的**。
+GZIP 压缩是实现此目的的一种方法，但 [Brotli 压缩](https://www.brotli.org/) 是另一种值得关注的新兴方法，**Brotli 是专门为网络设计的**。
 
 ### Gzip
 
@@ -348,11 +332,11 @@ GZIP 压缩是实现此目的的一种方法，但 [Brotli 压缩](https://www.b
 
 ### Brotli
 
-Brotli 是 Google 推出的一种新的压缩算法，相比 gzip 有更高的压缩率和更低的传输延迟。**特别侧重于HTTP压缩**。
+Brotli 是 Google 推出的一种新的压缩算法，相比 gzip 有更高的压缩率和更低的传输延迟。**特别侧重于 HTTP 压缩**。
 
 **Brotli 通过变种的 LZ77 算法、Huffman 编码以及二阶文本建模等方式进行数据压缩，与其他压缩算法相比，它有着更高的压缩效率**。
 
-与常见的通用压缩算法不同，Brotli 使用一个预定义的120千字节字典。该字典包含超过13000个常用单词、短语和其他子字符串，这些来自一个文本和HTML文档的大型语料库。预定义的算法可以提升较小文件的压缩密度。
+与常见的通用压缩算法不同，Brotli 使用一个预定义的 120 千字节字典。该字典包含超过 13000 个常用单词、短语和其他子字符串，这些来自一个文本和 HTML 文档的大型语料库。预定义的算法可以提升较小文件的压缩密度。
 
 Brotli 压缩算法具有多个特点，最典型的是以下 4 个：
 
@@ -365,7 +349,7 @@ Brotli 压缩算法具有多个特点，最典型的是以下 4 个：
 
 所有文件体积都为 KB
 
-#### Gzip 
+#### Gzip
 
 | 压缩等级 | HTML File 1   | HTML File 2  | CSS File 1   | CSS File 2   | JS File 1    | JS File 2    |
 | -------- | ------------- | ------------ | ------------ | ------------ | ------------ | ------------ |
@@ -380,7 +364,7 @@ Brotli 压缩算法具有多个特点，最典型的是以下 4 个：
 | 8        | 281.3 (74.7%) | 20.5 (78.9%) | 30.8 (84.4%) | 20.7 (86.3%) | 30.8 (65.6%) | 51.6 (71.2%) |
 | 9        | 281.3 (74.7%) | 20.5 (78.9%) | 30.8 (84.4%) | 20.7 (86.3%) | 30.8 (65.6%) | 51.6 (71.2%) |
 
-#### Brotli 
+#### Brotli
 
 | 压缩等级 | HTML File 1   | HTML File 2  | CSS File 1   | CSS File 2   | JS File 1    | JS File 2    |
 | -------- | ------------- | ------------ | ------------ | ------------ | ------------ | ------------ |
@@ -410,7 +394,7 @@ Brotli 采用与 Gzip 使用相同的技术，并使用现代方法对其进行�
 - CSS 文件比 Gzip 小 17%
 - JavaScript 文件比 Gzip 小 14%
 
-**Brotli的压缩速度不仅比gzip快，还能得到更小的文件。**
+**Brotli 的压缩速度不仅比 gzip 快，还能得到更小的文件。**
 
 ### 传输对比
 
@@ -422,23 +406,19 @@ Brotli 采用与 Gzip 使用相同的技术，并使用现代方法对其进行�
 | none      | 4061     | 14.06               | 125.1           | 23.45         |
 | br-static | 4087     | 5.85                | 105.58          | 23.3          |
 
-
-
 ### Brotli 兼容性
 
 主流浏览器基本上都支持了。
 
 ![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/brotli_caniuse.png)
 
-### 服务器支持 Brotli 
+### 服务器支持 Brotli
 
-支持Brotli压缩算法的浏览器使用的内容编码类型为  `br`
+支持 Brotli 压缩算法的浏览器使用的内容编码类型为 `br`
 
-http请求头：`Accept-Encoding: gzip, deflate, sdch, br`
+http 请求头：`Accept-Encoding: gzip, deflate, sdch, br`
 
-http返回头：`Content-Encoding: br`
-
-
+http 返回头：`Content-Encoding: br`
 
 ### 在 Nginx 上启用 Brotli
 
@@ -466,9 +446,7 @@ COPY ./dist  /webui
 CMD ["-g", "daemon off;"]
 ```
 
-
-
-### 前端支持 .br 
+### 前端支持 .br
 
 前端产物支持 br 产物为非必须项，但建议处理。当浏览器请求 `.js` 文件时，如果服务器上存在对应的 `.js.gz` 文件，Nginx 就会直接返回该文件，避免浪费带宽和时间将未压缩的文件传输到客户端。
 
@@ -498,14 +476,11 @@ new CompressionPlugin({
 // }],
 ```
 
-
-
 ### Nginx 配置
 
 http 配置添加一下内容
 
 ```nginx
-
 # ...
 http {
 
@@ -514,7 +489,7 @@ http {
     brotli_buffers       16 8k;
     brotli_min_length    20;
     brotli_types 		 text/plain text/css application/javascript application/json image/svg+xml application/xml+rss;
-    
+
     # gzip 配置保留。为了兼容性考虑，通常需要同时提供 Brotli 和 gzip 格式的压缩文件，以便浏览器选择适合自己的压缩格式进行下载。
     gzip on;
 }
@@ -532,14 +507,14 @@ http {
 
 #### brotli_types
 
-对指定的MIME类型的响应进行即时压缩。
+对指定的 MIME 类型的响应进行即时压缩。
 
-像JPEG、PNG、MP4这样的二进制文件，已经用特定格式的压缩方式压缩过了，比 gzip 和 brotli 的压缩方式要好。
+像 JPEG、PNG、MP4 这样的二进制文件，已经用特定格式的压缩方式压缩过了，比 gzip 和 brotli 的压缩方式要好。
 
-对PNG进行 `gzip` 或 `brotli` 是没有意义的：PNG已经被压缩了，它将变得更大而不是更小。
+对 PNG 进行 `gzip` 或 `brotli` 是没有意义的：PNG 已经被压缩了，它将变得更大而不是更小。
 
 所以要使用`brotli_types text/plain text/css application/javascript application/json image/svg+xml application/xml+rss`
-涵盖HTML（默认包含）、纯文本、JavaScript、JSON、SVG和RSS。
+涵盖 HTML（默认包含）、纯文本、JavaScript、JSON、SVG 和 RSS。
 
 #### brotli_comp_level
 
@@ -552,19 +527,68 @@ http {
 
 如果后端服务（响应头）接口已经添加了 `gzip` ，那么 `nginx`不会以`brotli`方式重新压缩。
 
-在后端服务器上禁用`gzip`，在nginx上使用`brotli`。
+在后端服务器上禁用`gzip`，在 nginx 上使用`brotli`。
 
-## Service Worker
+## 公共代码
+
+在项目中，一般会有 components 和 hooks 这类具有公共性质的代码。虽然是公共的，但是使用的频率不尽相同。因此要将使用频率高（> 10）的打成 chunk-components，其他的改造成按需的组件。
+
+现在项目中这部分的代码有 800kb（gzip后），占了首屏体积 25%。
+
+1. 按需加载组件和 hooks 可以使用异步组件和动态导入来实现。
+2. 将业务性质中的组件从该路径下移出去。
+
+首先，在需要使用组件或 hooks 的地方，使用 `import()` 异步导入对应的模块。例如：
+
+```js
+const MyComponent = () => import('@/components/MyComponent.vue');
+const useMyHook = () => import('@/hooks/useMyHook.js');
+```
+
+这样，在首次加载页面时，这些模块并不会被加载。而是在需要使用它们时才会异步加载。
+
+然后，为了优化加载速度，可以将这些异步组件和 hooks 通过 Webpack 的代码分割功能打包成单独的文件。在 Vue CLI 3+ 的项目中，可以通过配置 `vue.config.js` 来实现。例如：
+
+```js
+module.exports = {
+  configureWebpack: {
+    optimization: {
+      splitChunks: {
+        cacheGroups: {
+          components: {
+            name: 'chunk-components',
+            test: /[\\/]src[\\/]components[\\/]/,
+            priority: 10,
+            chunks: 'initial',
+            minChunks: 10
+          },
+          hooks: {
+            name: 'chunk-hooks',
+            test: /[\\/]src[\\/]hooks[\\/]/,
+            priority: 10,
+            chunks: 'initial',
+            minChunks: 10
+          },
+        },
+      },
+    },
+  },
+};
+```
+
+这样，Webpack 在打包时会将 `src/components` 下的组件和 `src/hooks` 下的 hooks 打包到名为 `chunk-components` 和 `chunk-hooks` 的文件中，并在需要使用时异步加载这些文件，从而实现按需加载。
+
+## Service Worker 
 
 Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScript 线程，用于代理网络请求，并能够缓存数据，从而提高应用程序的性能和可靠性。Service Worker 在网页中被注册后，会被浏览器安装并运行在浏览器的进程中，不同于网页中运行的 JavaScript 代码，Service Worker 是在独立的上下文中运行。
 
 基本原理：
 
-- 当Service Worker 第一次注册时，它会安装并缓存应用的所有静态资源。
-- 当用户请求访问应用时，浏览器会检查Service Worker是否存在，并尝试加载它。
-- 如果Service Worker已经加载并处于活动状态，它会拦截所有应用发出的网络请求，检查是否有匹配的缓存资源。
-- 如果缓存中有匹配的资源，Service Worker将返回缓存中的内容，否则它将继续发送网络请求，并将响应缓存起来。
-- 当用户离线时，Service Worker可以从缓存中加载应用的所有静态资源，从而使应用在离线时也能正常访问。
+- 当 Service Worker 第一次注册时，它会安装并缓存应用的所有静态资源。
+- 当用户请求访问应用时，浏览器会检查 Service Worker 是否存在，并尝试加载它。
+- 如果 Service Worker 已经加载并处于活动状态，它会拦截所有应用发出的网络请求，检查是否有匹配的缓存资源。
+- 如果缓存中有匹配的资源，Service Worker 将返回缓存中的内容，否则它将继续发送网络请求，并将响应缓存起来。
+- 当用户离线时，Service Worker 可以从缓存中加载应用的所有静态资源，从而使应用在离线时也能正常访问。
 
 特点：
 
@@ -573,8 +597,6 @@ Service Worker 是 Web API 的一部分，它是一种独立于网页的 JavaScr
 3. 后台同步：Service Worker 可以在后台执行任务，例如在网络连接重新连接时同步数据。
 4. 安全性：由于 Service Worker 是在独立的上下文中运行，因此它不受网页中的 JavaScript 代码的影响，并且可以跨站点进行操作。但是由于其具有拦截网络请求的能力，也可能会引发安全问题。
 5. 有效的缓存策略：Service Worker 可以自定义缓存策略，从而更好地控制缓存资源的生命周期和版本控制。
-
-
 
 ### 使用
 
@@ -599,8 +621,6 @@ if ('serviceWorker' in navigator) {
   });
 }
 ```
-
-
 
 ### 本地开发
 
@@ -656,6 +676,66 @@ module.exports = {
   ],
 };
 ```
+
+#### 更多配置：
+
+- `cacheId`：
+  - 类型：`string`，默认值：`workbox`。
+  - 作用：为 Service Worker 的缓存名称添加前缀
+- `clientsClaim`：
+  - 类型：`boolean`，默认值：`false`。
+  - 作用：在页面加载后立即接管控制权
+- `skipWaiting`：
+  - 类型：`boolean`，默认值：`false`。
+  - 作用：在 Service Worker 安装后立即接管控制权
+- `exclude`：
+  - 类型：`Array<RegExp>`，默认值：`[/\.map$/, /^manifest.*\.js(?:on)?$/]`。
+  - 作用：排除指定文件不被 Service Worker 缓存
+- `include`：
+  - 类型：`Array<RegExp>`，默认值：`[/\.js$/, /\.css$/, /\.html$/, /\.png$/, /\.jpg$/, /\.jpeg$/, /\.gif$/, /\.svg$/, /\.ico$/, /\.woff$/, /\.woff2$/, /\.ttf$/, /\.otf$/]`。
+  - 作用：指定需要被 Service Worker 缓存的文件
+- `maximumFileSizeToCacheInBytes`：
+  - 类型：`number`，默认值：`2097152` (2MB)。
+  - 作用：设置最大缓存文件大小
+- `runtimeCaching`：
+  - 类型：`Array<RuntimeCachingEntry>`，默认值：`[]`。
+  - 作用：配置需要进行运行时缓存的文件
+- `cleanupOutdatedCaches`：
+  - 类型：`boolean`，默认值：`false`。
+  - 作用：在 Service Worker 升级后，清除旧缓存
+- `manifestTransforms`：
+  - 类型：`Array<(manifest: object) => Promise<object>>`，默认值：`[]`。
+  - 作用：允许在 Service Worker 注册前转换生成的 manifest
+- `modifyURLPrefix`：
+  - 类型：`object`，默认值：`{}`。
+  - 作用：将缓存资源的 URL 前缀进行替换
+- `swDest`：
+  - 类型：`string`，默认值：`'sw.js'`。
+  - 作用：指定输出的 Service Worker 文件名
+- `swSrc`：
+  - 类型：`string`，默认值：`undefined`。
+  - 作用：指定自定义 Service Worker 文件路径
+- `dontCacheBustURLsMatching`：
+  - 类型：`RegExp`，默认值：`/\.\w{8}\./`。
+  - 作用：指定正则表达式，匹配需要缓存且不需要缓存清除的文件
+- `additionalManifestEntries`：
+  - 类型：`Array<ManifestEntry>`，默认值：`[]`。
+  - 作用：向 Service Worker 注册 manifest 添加自定义
+- `exclude`:
+  - 类型为 `Array<RegExp|string>`，默认值为 `[/\.map$/, /asset-manifest\.json$/]`。
+  - 该配置项用于排除某些文件不被缓存。默认排除了 `.map` 和 `asset-manifest.json` 文件，因为它们通常不会被缓存，而且如果缓存了反而会导致一些问题。
+- `maximumFileSizeToCacheInBytes`:
+  - 类型为 `number`，默认值为 `2 * 1024 * 1024`。
+  - 该配置项用于设置最大的文件大小（以字节为单位），超过这个大小的文件将不会被缓存。
+- `runtimeCaching`:
+  - 类型为 `Array<Object>`，默认值为 `[]`。
+  - 该配置项用于设置运行时缓存的策略。每个策略都是一个对象，具有以下属性：
+    - `urlPattern`: 类型为 `RegExp|string`，必填。用于匹配需要缓存的请求的 URL。可以是一个正则表达式或字符串，例如 `'https://api.example.com/*'`。
+    - `handler`: 类型为 `string` 或 `Object`，可选。用于指定缓存的处理方式。可以是一个字符串（例如 `'CacheFirst'`）或一个对象（例如 `{handler: 'CacheFirst', options: {}}`）。默认使用 `'CacheFirst'` 策略。
+    - `options`: 类型为 `Object`，可选。用于设置处理方式的选项。具体的选项根据不同的处理方式而有所不同。例如，如果使用 `'CacheFirst'` 策略，则可以设置 `cacheName` 选项来指定缓存名称。
+- `offlineGoogleAnalytics`:
+  - 类型为 `boolean`，默认值为 `false`。
+  - 该配置项用于启用离线 Google Analytics，以便在离线时也能够收集分析数据。
 
 注册 Service Worker
 
@@ -739,9 +819,5 @@ if ('serviceWorker' in navigator) {
 4. `controllerchange`：当控制当前页面的 `Service Worker` 发生变化时触发，比如页面第一次加载或者有新的 `Service Worker` 安装成功并激活时。
 
 这些周期事件可以通过 `navigator.serviceWorker.register` 注册 `Service Worker` 后，通过返回的 `ServiceWorkerRegistration` 实例进行监听。
-
-
-
-
 
 ### 对灰度的影响？
