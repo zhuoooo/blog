@@ -4,6 +4,57 @@
 
 ### echarts
 
+echarts^5.0 支持按需加载，官方文档：https://echarts.apache.org/handbook/zh/basics/import/
+
+注：只有5.x版本才支持了按需，低于这个版本的还未支持。
+
+
+
+### lodash
+
+如果项目里面第三方库依赖 `lodash`，项目必须装 `lodash` 的话，可以通过 `eslint` 限制项目不能使用 `lodash` ，单纯作为打包使用。
+
+安装 eslint-plugin-lodash 或 eslint-plugin-lodash-fp：
+
+```bash
+npm install eslint-plugin-lodash --save-dev
+npm install eslint-plugin-lodash-fp --save-dev
+```
+
+在 eslint 配置文件中增加相应的规则：
+
+```js
+{
+  "plugins": [
+    "lodash"
+  ],
+  "rules": {
+    "lodash/import-scope": ["error", "member"],
+    "lodash/chaining": ["error", "always"],
+    "lodash/prefer-lodash-method": "off",
+    "lodash/prefer-noop": "off",
+    "lodash/prefer-lodash-typecheck": "off",
+    "lodash-fp/consistent-compose": "error",
+    "lodash-fp/no-extraneous-iteratee-args": "error",
+    "lodash-fp/no-extraneous-function-wrapping": "error",
+    "lodash-fp/no-extraneous-iteratee-callback-args": "error",
+    "lodash-fp/no-unused-result": "error"
+  }
+}
+```
+
+这样配置后，开发人员在使用 lodash 时如果不符合规则，将会得到 eslint 的提示。
+
+### lottie-web
+
+在业务代码中可以通过 import() 进行按需。
+
+```js
+import Lottie from 'lottie-web'
+
+import('lottie-web').then(({default: Lottie}) => { })
+```
+
 
 
 ## 图片压缩
@@ -92,6 +143,8 @@ document.head.appendChild(script);
 ```
 
 这样，`main.js` 文件会在页面渲染完成后自动执行，而 `dynamic.js` 文件会在 `main.js` 执行前提前加载到浏览器缓存中，可以提高网页加载速度。
+
+注：禁用浏览器缓存通常会导致preload和prefetch失效，因为浏览器会在缓存中查找资源，而不是重新下载它们。当你使用preload和prefetch时，浏览器会尝试提前下载资源并将其存储在缓存中，以便在未来需要时更快地加载它们。如果你禁用了浏览器缓存，那么它就不会缓存这些资源，也就无法使用预加载和预取功能了。因此，在使用preload和prefetch时，不建议禁用浏览器缓存。
 
 ## HTTP2
 
@@ -533,7 +586,7 @@ http {
 
 在项目中，一般会有 components 和 hooks 这类具有公共性质的代码。虽然是公共的，但是使用的频率不尽相同。因此要将使用频率高（> 10）的打成 chunk-components，其他的改造成按需的组件。
 
-现在项目中这部分的代码有 800kb（gzip后），占了首屏体积 25%。
+现在项目中这部分的代码有 200kb（gzip后），占了首屏体积 10%。
 
 1. 按需加载组件和 hooks 可以使用异步组件和动态导入来实现。
 2. 将业务性质中的组件从该路径下移出去。
