@@ -582,7 +582,69 @@ http {
 
 在后端服务器上禁用`gzip`，在 nginx 上使用`brotli`。
 
-## 公共代码
+## 代码体积
+
+### 打包体积
+
+区别支持module 和 nomodule 的浏览器，减少没有必要的babel转译。
+
+Vue CLI 的 modern 模式和 legacy 模式主要是针对浏览器的不同特性来进行分包，以达到更好的性能优化。在 modern 模式下，会使用 ES modules 规范打包，利用浏览器的原生模块化加载能力，可以将一些不需要兼容低版本浏览器的代码拆分出来，以达到减小文件体积的目的。而在 legacy 模式下，会针对低版本浏览器使用 Babel 转译，并使用传统的 script 标签来加载脚本，以保证在低版本浏览器中的兼容性。
+
+vue-cli 配置：
+
+```js
+const filename = process.env.VUE_CLI_MODERN_BUILD ? 
+      'static/js/[name].[contenthash:8].mjs' : 'static/js/[name].[contenthash:8].legacy.js';
+config.output
+    .filename(filename)
+    .chunkFilename(filename);
+```
+
+babel 配置：
+
+```js
+const isModern = process.env.VUE_CLI_MODERN_MODE;
+const plugins = [
+   // ...
+];
+
+module.exports = {
+    babelrcRoots: ['.'],
+    presets: [
+        [
+            '@babel/preset-env',
+            {
+                modules: false, // 关闭 Babel 的模块转换，交由 Webpack 处理
+                corejs: isModern ? { version: '3.22.7', proposals: true } : undefined,
+                useBuiltIns: isModern ? 'usage' : undefined,
+                targets: isModern ?
+                    {
+                        esmodules: true, // 针对现代浏览器使用 ES6+ 的特性
+                    } :
+                    {
+                        chrome: '80', // 针对 Chrome 80 及以上版本
+                        firefox: '72', // 针对 Firefox 72 及以上版本
+                        edge: '79', // 针对 Edge 79 及以上版本
+                        safari: '13', // 针对 Safari 13 及以上版本
+                        ios: '13', // 针对 iOS 13 及以上版本
+                        android: '7.0' // 针对 Android 7.0 及以上版本
+                    }
+            }
+        ]
+    ],
+    plugins
+};
+```
+
+
+
+.mjs 是 ECMAScript 模块的扩展名，它遵循 ECMAScript 模块规范。它支持顶级的 `import` 和 `export` 语句，支持模块作用域和静态解析，可以在开发中使用最新的 ECMAScript 模块语法，可以在浏览器和 Node.js 环境中运行，还可以与现有的 CommonJS 模块一起工作，需要在 package.json 中指定 "type": "module"。
+
+而 .js 是传统的 JavaScript 文件扩展名，它是旧版 CommonJS 模块的主要形式。这种格式使用 `module.exports` 和 `require` 来导出和导入模块，这些模块是运行时加载的，需要在浏览器或 Node.js 环境中使用打包工具来将这些模块打包成适当的格式。
+
+总的来说，.mjs 可以让开发者使用最新的 ECMAScript 模块语法并支持更高级的模块化功能，而 .js 适用于传统的 CommonJS 模块化方案，可以在更广泛的环境中使用。
+
+### 公共代码
 
 在项目中，一般会有 components 和 hooks 这类具有公共性质的代码。虽然是公共的，但是使用的频率不尽相同。因此要将使用频率高（> 10）的打成 chunk-components，其他的改造成按需的组件。
 
