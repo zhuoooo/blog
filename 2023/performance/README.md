@@ -72,6 +72,13 @@ import('lottie-web').then(({default: Lottie}) => { })
 
 ## CDN
 
+这个直接使用供应商的能力，但需要注意的是：
+
+1. 设置好缓存策略
+2. 制定预热策略
+
+
+
 ## 预加载
 
 `prefetch`和`preload`都是一种浏览器预加载资源的机制，但是在具体实现和应用场景上有所不同。
@@ -145,6 +152,19 @@ document.head.appendChild(script);
 这样，`main.js` 文件会在页面渲染完成后自动执行，而 `dynamic.js` 文件会在 `main.js` 执行前提前加载到浏览器缓存中，可以提高网页加载速度。
 
 注：禁用浏览器缓存通常会导致preload和prefetch失效，因为浏览器会在缓存中查找资源，而不是重新下载它们。当你使用preload和prefetch时，浏览器会尝试提前下载资源并将其存储在缓存中，以便在未来需要时更快地加载它们。如果你禁用了浏览器缓存，那么它就不会缓存这些资源，也就无法使用预加载和预取功能了。因此，在使用preload和prefetch时，不建议禁用浏览器缓存。
+
+
+
+### preRequest
+
+前边两种是浏览器对静态资源的一个处理。那么还有一种场景需要依赖请求响应数据，这会直接阻塞页面的展示。
+
+那么我们可以
+
+1. 将请求提前到 index.html
+2. 在业务中发起请求之后能获取 preRequest 的内容
+
+![1668407203865_首页性能优化2drawio](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2023/1668407203865_%E9%A6%96%E9%A1%B5%E6%80%A7%E8%83%BD%E4%BC%98%E5%8C%962drawio.png)
 
 ## HTTP2
 

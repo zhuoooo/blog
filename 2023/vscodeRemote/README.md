@@ -18,6 +18,7 @@
 #### 安装 Git
 
 ```shell
+# 直接下载
 yum install -y git
 ```
 
@@ -25,11 +26,69 @@ yum install -y git
 
 #### 安装 Node
 
+略
+
 
 
 #### 安装 Docker 
 
 https://www.runoob.com/docker/centos-docker-install.html
+
+
+
+#### 安装 Docker-compose
+
+https://www.runoob.com/docker/docker-compose.html
+
+快速初始化开发环境
+
+```yml
+version: '2'
+
+services:
+  mysql:
+    image: mysql:5.7.36
+    hostname: mysql
+    restart: always
+    container_name: mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root123456
+      MYSQL_DATABASE: platform_db
+    ports:
+      - "3306:3306"
+    # 将数据文件和日志文件分别挂载到了本地的目录下，便于数据的持久化存储和管理。
+    volumes:
+      - /data/platform_db/mysql/data:/var/lib/mysql
+      - /data/platform_db/mysql/config/my.cnf:/etc/my.cnf
+      - /data/platform_db/mysql/init/:/docker-entrypoint-initdb.d/
+
+  mongodb:
+    image: mongo:4.4.6
+    container_name: mongodb
+    restart: always
+    environment:
+      MONGO_INITDB_DATABASE: platform_db
+    # 将数据文件和日志文件分别挂载到了本地的目录下，便于数据的持久化存储和管理。
+    volumes:
+      - /data/platform_db/mongodb/data:/data/db
+      - /data/platform_db/mongodb/logs:/data/logs
+    ports:
+      - "27017:27017"
+
+  redis:
+    image: redis:5.0.9
+    container_name: redis
+    command: redis-server /usr/local/etc/redis/redis.conf
+    restart: always
+    environment:
+      REDIS_PASSWORD: redis123456
+    ports:
+      - "6379:6379"
+    # 将数据文件和日志文件分别挂载到了本地的目录下，便于数据的持久化存储和管理。
+    volumes:
+      - /data/platform_db/redis/data:/data
+      - /data/platform_db/redis/redis.conf:/usr/local/etc/redis/redis.conf
+```
 
 
 
@@ -79,6 +138,10 @@ docker run -itd --name redis-test -p 6379:6379 redis:5.0.9
 ```shell
 # 添加子账号
 adduser username -p password
+
+# 给子账号加权限
+ usermod -aG wheel [username]
+ sudo chown -R [username]:[username] /home/xmt/
 ```
 
 
