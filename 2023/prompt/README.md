@@ -2,6 +2,16 @@
 
 ChatGPT 可以看做一个拥有一定的学习能力和理解上下文能力的专家系统。现阶段它能很好地向我们提供语言类的服务。
 
+定义：
+
+术语 中文名称 解释
+
+- prompt 提示语
+- Zore-shot 零样本
+- Few-Shot 少样本
+- Chain-of-Thought 链式思考
+- Self-Consistency 自洽性
+
 ## Prompt 编写模式——如何将思维框架赋予机器，以设计模式的形式来思考 prompt
 
 ![prompt-engine.svg](https://github.com/prompt-engineering/prompt-patterns/raw/master/patterns/prompt-engine.svg)
