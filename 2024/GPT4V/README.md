@@ -18,7 +18,7 @@
 
 prompt
 
-![](./1.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2024/1.png)
 
 ```
 task: play a random song for me.
@@ -53,7 +53,7 @@ type ClickAction = { action: "click", element: number };type TypeAction = { acti
 
 prompt
 
-![](./2.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2024/2.png)
 
 ```
 task: play a random song for me。
@@ -87,7 +87,7 @@ type ClickAction = { action: "click", element: number };type TypeAction = { acti
 
 prompt
 
-![](./3.png)
+![](https://cdn.jsdelivr.net/gh/zhuoooo/pictures/2024/3.png)
 
 ```
 task: play a random song for me。
